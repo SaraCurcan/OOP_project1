@@ -72,3 +72,10 @@ vcpkg_installed/
 Testing/
 .cache/
 .vscode/
+
+# JetBrains / CLion specific
+.idea/
+cmake-build-*/
+
+# Other system/config files
+.DS_Store
