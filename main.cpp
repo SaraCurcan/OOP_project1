@@ -27,6 +27,7 @@ public:
     void eat();
     void sleep();
     void cuddle();
+    void ShowStatus();
 };
 
 int Pet::interactions=0;
@@ -154,6 +155,15 @@ void Pet::ShowWarnings() {
      }
 }
 
+void Pet::ShowStatus() {
+     std::cout<<"PET STATUS: "<<name<<std::endl;
+     std::cout<<" --------------------"<<std::endl;
+     std::cout<<"|  Health  :  "<<health<<"/100 "<<std::endl;
+     std::cout<<"|  Hunger  :  "<<hunger<<"/100 "<<std::endl;
+     std::cout<<"|  Energy  :  "<<energy<<"/100 "<<std::endl;
+     std::cout<<"|  Happy   :  "<<happiness<<"/100 "<<std::endl;
+     std::cout<<" --------------------"<<std::endl;
+ }
 
 int main() {
 
