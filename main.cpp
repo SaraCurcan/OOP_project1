@@ -83,35 +83,35 @@ void Pet::eat() {
      health+=10;
      energy+=15;
      happiness+=7;
-     std::cout<<name<<" has just eaten.  [ HG:-25 , HP:+10 , STAM:+15 , HAPPY:+7 ]";
+     std::cout<<name<<" has just eaten.  [ HG:-25 , HP:+10 , STAM:+15 , HAPPY:+7 ]\n";
      CheckLimits();
-     CheckDeath();
      ShowWarnings();
+     CheckDeath();
  }
 
 void Pet::sleep() {
      energy+=25;
      health+=10;
      hunger+=5;
-     std::cout<<name<<" is awake now. [ HG:+5 EN:+25 , HP:+10";
+     std::cout<<name<<" is awake now. [ HG:+5 EN:+25 , HP:+10\n";
      CheckLimits();
-     CheckDeath();
      ShowWarnings();
+     CheckDeath();
  }
 
 void Pet::cuddle() {
     happiness+=20;
     energy-=5;
-     std::cout<<"You spent some quality time with "<<name<<"."<<"  [ HAPPY:+20 , EN:-5 ]";
+     std::cout<<"You spent some quality time with "<<name<<"."<<"  [ HAPPY:+20 , EN:-5 ] \n";
      CheckLimits();
-     CheckDeath();
      ShowWarnings();
+     CheckDeath();
  }
 
 void Pet::CheckDeath() {
     if (health<=0) {
         isAlive=false;
-        std::cout<<"I'm sorry, but "<<name<<" is no longer alive.";
+        std::cout<<"I'm sorry, but "<<name<<" is no longer alive. \n";
     }
 }
 
@@ -140,14 +140,19 @@ void Pet::CheckLimits() {
 void Pet::ShowWarnings() {
     if (health<=20)
         std::cout<<"WARNING: "<<name<<"'s health is not good"<<std::endl;
-     if (hunger>=75)
+     if (hunger>=75) {
          std::cout<<"WARNING: "<<name<<" is starving! Feed it soon."<<std::endl;
-     if (energy<=20)
+         health-=35;
+     }
+     if (energy<=10) {
          std::cout<<"WARNING: "<<name<<" is really tired"<<std::endl;
-     if (happiness<=20)
+         health-=25;
+     }
+     if (happiness<=20) {
          std::cout<<"WARNING: "<<name<<" is sad. Cuddle or play with him"<<std::endl;
+         health-=10;
+     }
 }
-
 
 
 int main() {
