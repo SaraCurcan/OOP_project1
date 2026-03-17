@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include<vector>
 class Pet{
 private:
     char* name;
@@ -260,7 +261,8 @@ private:
     const std::string fruits;
     const std::string meat;
     const std::string treats;
-
+    const std::string sweets;
+    std::vector<std::string> shoppingCart;
     static const int meat_price=20;
     static const int fruits_price=13;
     static const int vegetables_price=15;
@@ -270,14 +272,15 @@ public:
     Shop(double);
     Shop(const Shop &obj);
     Shop& operator=(const Shop &obj);
+    void goShopping();
 };
-Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats") {
+Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"){
     this->income=0.0;
 }
 Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats") {
     this->income=income;
 }
-Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats") {
+Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"){
     this->income=obj.income;
 }
 Shop& Shop::operator=(const Shop &obj) {
@@ -285,6 +288,152 @@ Shop& Shop::operator=(const Shop &obj) {
     this->income=obj.income;
     return *this;
 }
+
+void Shop::goShopping() {
+    double price=0;
+    int choice=-1;
+    while (choice!=5 && choice!=6) {
+        std::cout<<"1"<<meat<<"\n";
+        std::cout<<"2"<<fruits<<"\n";
+        std::cout<<"3"<<vegetables<<"\n";
+        std::cout<<"4"<<treats<<"\n";
+        std::cout<<"5 Abandon cart and exit\n";
+        std::cout<<"6 Buy\n";
+        std::cin>>choice;
+
+        switch (choice) {
+            case 1: {
+                std::cout<<"1. Chicken   "<<"2. Beef   "<<"3. Fish   "<<"4. Turkey\n";
+                int meatChoice;
+                std::cin>>meatChoice;
+                switch (meatChoice){
+                    case 1: {
+                        price+=meat_price;
+                        shoppingCart.push_back("Chicken");
+                        break;
+                    }
+                    case 2: {
+                        price+=meat_price;
+                        shoppingCart.push_back("Beef");
+                        break;
+                    }
+                    case 3: {
+                        price+=meat_price;
+                        shoppingCart.push_back("Fish");
+                        break;
+                    }
+                    case 4: {
+                        price+=meat_price;
+                        shoppingCart.push_back("Turkey");
+                        break;
+                    }
+                    default:
+                        std::cout<<"Invalid choice\n";
+                        break;
+                }
+                break;
+            }
+            case 2: {
+                std::cout<<"1. Apple   "<<"2. Banana   "<<"3. Strawberry   "<<"4. Peach\n";
+                int fruitChoice;
+                std::cin>>fruitChoice;
+                switch (fruitChoice){
+                    case 1: {
+                        price+=fruits_price;
+                        shoppingCart.push_back("Apple");
+                        break;
+                    }
+                    case 2: {
+                        price+=fruits_price;
+                        shoppingCart.push_back("Banana");
+                        break;
+                    }
+                    case 3: {
+                        price+=fruits_price;
+                        shoppingCart.push_back("Strawberry");
+                        break;
+                    }
+                    case 4: {
+                        price+=fruits_price;
+                        shoppingCart.push_back("Peach");
+                        break;
+                    }
+                    default:
+                        std::cout<<"Invalid choice\n";
+                        break;
+                }
+                break;
+            }
+            case 3:{
+                std::cout<<"1. Tomato   "<<"2. Cucumber   "<<"3. Carrot   "<<"4. Potato\n";
+                int fruitChoice;
+                std::cin>>fruitChoice;
+                switch (fruitChoice){
+                    case 1: {
+                        price+=vegetables_price;
+                        shoppingCart.push_back("Tomato");
+                        break;
+                    }
+                    case 2: {
+                        price+=vegetables_price;
+                        shoppingCart.push_back("Cucumber");
+                        break;
+                    }
+                    case 3: {
+                        price+=vegetables_price;
+                        shoppingCart.push_back("Carrot");
+                        break;
+                    }
+                    case 4: {
+                        price+=vegetables_price;
+                        shoppingCart.push_back("Potato");
+                        break;
+                    }
+                    default:
+                        std::cout<<"Invalid choice\n";
+                        break;
+                }
+                break;
+            }
+            case 4: {
+                std::cout<<"1. Biscuit   "<<"2. Dental_Chews   "<<"3. Jerky   "<<"4. Cake\n";
+                int fruitChoice;
+                std::cin>>fruitChoice;
+                switch (fruitChoice){
+                    case 1: {
+                        price+=treats_price;
+                        shoppingCart.push_back("Biscuit");
+                        break;
+                    }
+                    case 2: {
+                        price+=treats_price;
+                        shoppingCart.push_back("Dental_Chews");
+                        break;
+                    }
+                    case 3: {
+                        price+=treats_price;
+                        shoppingCart.push_back("Jerky");
+                        break;
+                    }
+                    case 4: {
+                        price+=treats_price;
+                        shoppingCart.push_back("Cake");
+                        break;
+                    }
+                    default:
+                        std::cout<<"Invalid choice\n";
+                        break;
+                }
+                break;
+            }
+            default: {
+                std::cout<<"Invalid choice\n";
+                break;
+            }
+        }
+    }
+}
+
 int main() {
 
 }
