@@ -5,8 +5,9 @@
 class Pet{
 private:
     char* name;
-    const char* breed;
-    const int birthday;
+    const std::string breed;
+    float age;
+    const std::string type;
     static int interactions;
     int happiness;
     int energy;
@@ -20,7 +21,7 @@ private:
 
 public:
     Pet();
-    Pet(char*, const char*, const int);
+    Pet(char*,std::string,float,std::string);
     Pet(const Pet &obj);
     Pet& operator=(const Pet &obj);
     ~Pet();
@@ -32,28 +33,34 @@ public:
 
 int Pet::interactions=0;
 
- Pet::Pet() : birthday(2026), breed("N/A"), isAlive(true) {
-     this -> name = strcpy(new char[4], "N/A");
-     this -> happiness=100;
-     this -> energy=100;
-     this -> health=100;
-     this -> hunger=0;
+ Pet::Pet() :breed("N/A"),type("N/A") {
+     this->name = strcpy(new char[4], "N/A");
+     isAlive=true;
+     age=0.0;
+     happiness=100;
+     energy=100;
+     health=100;
+     hunger=0;
  }
 
-Pet::Pet(char* name, const char* breed, int birthday): breed(breed), birthday(birthday),isAlive(true){
+Pet::Pet(char* name, std::string breed, float age, std::string type): breed(breed), type(type){
     this -> name = strcpy(new char[strlen(name)+1],name);
-     this -> happiness=100;
-     this -> energy=100;
-     this -> health=100;
-     this -> hunger=0;
+     isAlive=true;
+     this->age=age;
+     happiness=100;
+     energy=100;
+     health=100;
+     hunger=0;
  }
 
-Pet::Pet(const Pet &obj): breed(obj.breed), birthday(obj.birthday), isAlive(obj.isAlive){
+Pet::Pet(const Pet &obj): breed(obj.breed), type(obj.type){
      this -> name = strcpy(new char[strlen(obj.name)+1], obj.name);
-     this -> happiness=100;
-     this -> health=100;
-     this -> energy =100;
-     this -> hunger=0;
+     this->isAlive=obj.isAlive;
+     this->age=obj.age;
+     happiness=100;
+     health=100;
+     energy =100;
+     hunger=0;
  }
 
 Pet& Pet::operator=(const Pet &obj){
@@ -64,10 +71,12 @@ Pet& Pet::operator=(const Pet &obj){
      this -> name=new char[strlen(obj.name)+1];
      strcpy(this ->name,obj.name);
 
-     this -> happiness=obj.happiness;
-     this -> health=obj.health;
-     this -> energy=obj.energy;
-     this -> hunger=obj.hunger;
+     this->isAlive=obj.isAlive;
+     this->age=obj.age;
+     happiness=obj.happiness;
+     health=obj.health;
+     energy=obj.energy;
+     hunger=obj.hunger;
 
      return *this;
  }
