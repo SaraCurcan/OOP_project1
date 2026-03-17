@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstring>
-#include <cmath>
 #include <string>
 class Pet{
 private:
@@ -29,6 +28,8 @@ public:
     void sleep();
     void cuddle();
     void ShowStatus();
+    int getHealth() const;
+    void setHealth(int health);
 };
 
 int Pet::interactions=0;
@@ -174,6 +175,13 @@ void Pet::ShowStatus() {
      std::cout<<" --------------------"<<std::endl;
  }
 
+int Pet::getHealth() const {
+     return health;
+ }
+void Pet::setHealth(int health) {
+     this->health=health;
+     CheckLimits();
+ }
 class Owner {
  private:
      std::string name;
@@ -186,6 +194,10 @@ class Owner {
      Owner(const Owner &obj);
      Owner& operator=(const Owner &obj);
      ~Owner();
+     void feed();
+     void putToSleep();
+     void cuddleIt();
+     void giveMedicine();
 
  };
 
@@ -200,32 +212,46 @@ Owner::Owner(std::string name, int age, double coins,Pet* myPet) {
     this->name=name;
     this->age=age;
     this->coins=coins;
-    if (myPet!=nullptr) this->myPet=new Pet(*myPet);
-    else this->myPet=nullptr;
+    this->myPet=myPet;
 }
 
 Owner::Owner(const Owner &obj) {
     this->name=obj.name;
     this->age=obj.age;
     this->coins=obj.coins;
-    if (obj.myPet!=nullptr) this->myPet=new Pet(*obj.myPet);
-    else this->myPet=nullptr;
+    this->myPet=obj.myPet;
 }
 
 Owner& Owner::operator=(const Owner &obj) {
     if (this==&obj) return *this;
-    delete this->myPet;
     this->name=obj.name;
     this->age=obj.age;
     this->coins=obj.coins;
-    if(obj.myPet!=nullptr) this->myPet=new Pet(*obj.myPet);
-    else this->myPet=nullptr;
+    this->myPet=obj.myPet;
     return *this;
 }
 
 Owner::~Owner() {
-    delete myPet;
+
+}
+
+void Owner::putToSleep() {
+    if (myPet!=nullptr) myPet->sleep();
+}
+void Owner::cuddleIt() {
+    if (myPet!=nullptr) myPet->cuddle();
+
+}
+void Owner::giveMedicine() {
+    if (myPet!=nullptr){
+        if (coins>=100.0) {
+            coins-=100.0;
+            myPet->setHealth(100);
+            std::cout<<name<<" is feeling better now."<<std::endl;
+        }
+        else std::cout<<"not enough money!"<<std::endl;
+    }
 }
 int main() {
-
+    
  }
