@@ -165,6 +165,58 @@ void Pet::ShowStatus() {
      std::cout<<" --------------------"<<std::endl;
  }
 
+class Owner {
+ private:
+     std::string name;
+     int age;
+     double coins;
+     Pet* myPet;
+ public:
+     Owner();
+     Owner(std::string, int, double,Pet*);
+     Owner(const Owner &obj);
+     Owner& operator=(const Owner &obj);
+     ~Owner();
+
+ };
+
+Owner::Owner() {
+    this->name="N/A";
+    this->age=0;
+    this->coins=100.0;
+    this->myPet=nullptr;
+}
+
+Owner::Owner(std::string name, int age, double coins,Pet* myPet) {
+    this->name=name;
+    this->age=age;
+    this->coins=coins;
+    if (myPet!=nullptr) this->myPet=new Pet(*myPet);
+    else this->myPet=nullptr;
+}
+
+Owner::Owner(const Owner &obj) {
+    this->name=obj.name;
+    this->age=obj.age;
+    this->coins=obj.coins;
+    if (obj.myPet!=nullptr) this->myPet=new Pet(*obj.myPet);
+    else this->myPet=nullptr;
+}
+
+Owner& Owner::operator=(const Owner &obj) {
+    if (this==&obj) return *this;
+    delete this->myPet;
+    this->name=obj.name;
+    this->age=obj.age;
+    this->coins=obj.coins;
+    if(obj.myPet!=nullptr) this->myPet=new Pet(*obj.myPet);
+    else this->myPet=nullptr;
+    return *this;
+}
+
+Owner::~Owner() {
+    delete myPet;
+}
 int main() {
 
  }
