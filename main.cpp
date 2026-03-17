@@ -252,6 +252,39 @@ void Owner::giveMedicine() {
         else std::cout<<"not enough money!"<<std::endl;
     }
 }
+
+class Shop{
+private:
+    double income;
+    const std::string vegetables;
+    const std::string fruits;
+    const std::string meat;
+    const std::string treats;
+
+    static const int meat_price=20;
+    static const int fruits_price=13;
+    static const int vegetables_price=15;
+    static const int treats_price=25;
+public:
+    Shop();
+    Shop(double);
+    Shop(const Shop &obj);
+    Shop& operator=(const Shop &obj);
+};
+Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats") {
+    this->income=0.0;
+}
+Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats") {
+    this->income=income;
+}
+Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats") {
+    this->income=obj.income;
+}
+Shop& Shop::operator=(const Shop &obj) {
+    if (this==&obj) return *this;
+    this->income=obj.income;
+    return *this;
+}
 int main() {
-    
- }
+
+}
