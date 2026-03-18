@@ -378,6 +378,7 @@ public:
     Shop(double);
     Shop(const Shop &obj);
     Shop& operator=(const Shop &obj);
+    ~Shop();
     void goShopping(Owner& owner);
 };
 Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"){
@@ -388,6 +389,9 @@ Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"
 }
 Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"){
     this->income=obj.income;
+}
+Shop::~Shop() {
+
 }
 Shop& Shop::operator=(const Shop &obj) {
     if (this==&obj) return *this;
@@ -498,6 +502,16 @@ void Shop::addToCart(std::string item, int price,double &totalPrice) {
     shoppingCart.push_back(item);
     totalPrice+=price;
 }
+
+class Games{
+private:
+    double reward;
+public:
+    Games();
+    Games(double);
+    Games(const Games &obj);
+    Games& operator=(const Games &obj);
+};
 
 int main() {
 }
