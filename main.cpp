@@ -25,7 +25,7 @@ public:
     Pet(const Pet &obj);
     Pet& operator=(const Pet &obj);
     ~Pet();
-    void eat();
+    void eat(std::string foodChoice);
     void sleep();
     void cuddle();
     void ShowStatus();
@@ -96,12 +96,27 @@ Pet::~Pet() {
      }
  }
 
-void Pet::eat() {
-     hunger-=25;
-     health+=10;
-     energy+=15;
-     happiness+=7;
-     std::cout<<name<<" has just eaten.  [ HG:-25 , HP:+10 , STAM:+15 , HAPPY:+7 ]\n";
+void Pet::eat(std::string foodChoice) {
+     if (foodChoice=="Chicken" || foodChoice=="Turkey" || foodChoice=="Beef" || foodChoice=="Fish") {
+         hunger-=30;
+         health+=20;
+         energy+=15;
+     }
+     else if (foodChoice=="Strawberry" || foodChoice=="Banana" || foodChoice=="Blueberry" || foodChoice=="Peach") {
+         hunger-=15;
+         health+=10;
+         energy+=15;
+     }
+     else if (foodChoice=="Carrot" || foodChoice=="Tomato" || foodChoice=="Potato" || foodChoice=="Cucumber") {
+         hunger-=25;
+         health+=15;
+         energy+=15;
+     }
+     else if (foodChoice=="Jerky" || foodChoice=="Biscuit" || foodChoice=="Dental_Chews" || foodChoice=="Cake") {
+         hunger-=15;
+         happiness+=15;
+     }
+     std::cout<<name<<" loved this "<<foodChoice<<"\n";
      CheckLimits();
      ShowWarnings();
      CheckDeath();
@@ -160,13 +175,13 @@ void Pet::ShowWarnings() {
         std::cout<<"WARNING: "<<name<<"'s health is not good"<<std::endl;
      if (hunger>=75) {
          std::cout<<"WARNING: "<<name<<" is starving! Feed it soon."<<std::endl;
-         health-=35;
+         health-=40;
      }
      if (energy<=10) {
          std::cout<<"WARNING: "<<name<<" is really tired"<<std::endl;
-         health-=25;
+         health-=40;
      }
-     if (happiness<=20) {
+     if (happiness<=10) {
          std::cout<<"WARNING: "<<name<<" is sad. Cuddle or play with him"<<std::endl;
          health-=10;
      }
@@ -229,6 +244,8 @@ class Owner {
      double getCoins() const;
      void setCoins(double coins);
     void addToInventory(const std::vector<std::string>& items);
+     void ShowInventory() const;
+     void removeFood(std::string item);
 
  };
 
@@ -263,7 +280,7 @@ Owner& Owner::operator=(const Owner &obj) {
 }
 
 Owner::~Owner() {
-
+    delete myPet;
 }
 
 void Owner::putToSleep() {
@@ -299,6 +316,50 @@ void Owner::setCoins(double coins) {
 void Owner::addToInventory(const std::vector<std::string>& items) {
     inventory.insert(inventory.end(),items.begin(),items.end());
 }
+
+void Owner::ShowInventory() const {
+    if (inventory.empty()) {
+        std::cout<<"Inventory is empty\n";
+        return;
+    }
+    for (int i=0; i<inventory.size();i++) {
+        std::cout<<inventory[i]<<",  ";
+    }
+    std::cout<<"\n";
+}
+
+void Owner::feed() {
+    if (myPet==nullptr)
+        return;
+    bool found=false;
+    std::cout<<"Your items:\n";
+    ShowInventory();
+    std::cout<<"Write your choice\n";
+    std::string foodChoice;
+    std::cin>>foodChoice;
+    for (int i=0;i<inventory.size();i++) {
+        if (inventory[i]==foodChoice) {
+            found=true;
+            break;
+        }
+
+    }
+    if (found) {
+        removeFood(foodChoice);
+        myPet->eat(foodChoice);
+    }
+    else std::cout<<"Choose a valid item\n";
+}
+
+void Owner::removeFood(std::string item) {
+    for (int i=0;i<inventory.size();i++) {
+        if (item==inventory[i]) {
+            inventory.erase(inventory.begin()+i);
+            break;
+        }
+    }
+}
+
 class Shop{
 private:
     double income;
@@ -306,7 +367,6 @@ private:
     const std::string fruits;
     const std::string meat;
     const std::string treats;
-    const std::string sweets;
     std::vector<std::string> shoppingCart;
     static const int meat_price=20;
     static const int fruits_price=13;
@@ -339,6 +399,7 @@ void Shop::goShopping(Owner& owner) {
     double price=0;
     int choice=-1;
     while (choice!=5) {
+        std::cout<<"WELCOME! What do you eant to buy?\n";
         std::cout<<"1"<<meat<<"\n";
         std::cout<<"2"<<fruits<<"\n";
         std::cout<<"3"<<vegetables<<"\n";
@@ -350,7 +411,7 @@ void Shop::goShopping(Owner& owner) {
 
         switch (choice) {
             case 1: {
-                std::cout<<"Choose meat type";
+                std::cout<<"Choose meat type\n";
                 std::cout<<"1. Chicken   "<<"2. Beef   "<<"3. Fish   "<<"4. Turkey\n";
                 int meatChoice;
                 std::cin>>meatChoice;
@@ -364,7 +425,7 @@ void Shop::goShopping(Owner& owner) {
                 break;
             }
             case 2: {
-                std::cout<<"Select fruit:";
+                std::cout<<"Select fruit:\n";
                 std::cout<<"1. Blueberry   "<<"2. Banana   "<<"3. Strawberry   "<<"4. Peach\n";
                 int fruitChoice;
                 std::cin>>fruitChoice;
@@ -378,7 +439,7 @@ void Shop::goShopping(Owner& owner) {
                 break;
             }
             case 3:{
-                std::cout<<"Choose your veggies";
+                std::cout<<"Choose your veggies\n";
                 std::cout<<"1. Tomato   "<<"2. Cucumber   "<<"3. Carrot   "<<"4. Potato\n";
                 int veggieChoice;
                 std::cin>>veggieChoice;
@@ -392,7 +453,7 @@ void Shop::goShopping(Owner& owner) {
                 break;
             }
             case 4: {
-                std::cout<<"Buy some treats";
+                std::cout<<"Buy some treats\n";
                 std::cout<<"1. Biscuit   "<<"2. Dental_Chews   "<<"3. Jerky   "<<"4. Cake\n";
                 int treatsChoice;
                 std::cin>>treatsChoice;
