@@ -215,6 +215,7 @@ class Owner {
      int age;
      double coins;
      Pet* myPet;
+     std::vector<std::string> inventory;
  public:
      Owner();
      Owner(std::string, int, double,Pet*);
@@ -225,6 +226,9 @@ class Owner {
      void putToSleep();
      void cuddleIt();
      void giveMedicine();
+     double getCoins() const;
+     void setCoins(double coins);
+    void addToInventory(const std::vector<std::string>& items);
 
  };
 
@@ -285,6 +289,16 @@ void Owner::giveMedicine() {
     }
 }
 
+double Owner::getCoins() const {
+    return coins;
+}
+void Owner::setCoins(double coins) {
+    this->coins=coins;
+}
+
+void Owner::addToInventory(const std::vector<std::string>& items) {
+    inventory.insert(inventory.end(),items.begin(),items.end());
+}
 class Shop{
 private:
     double income;
@@ -304,7 +318,7 @@ public:
     Shop(double);
     Shop(const Shop &obj);
     Shop& operator=(const Shop &obj);
-    void goShopping();
+    void goShopping(Owner& owner);
 };
 Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"){
     this->income=0.0;
@@ -321,20 +335,22 @@ Shop& Shop::operator=(const Shop &obj) {
     return *this;
 }
 
-void Shop::goShopping() {
+void Shop::goShopping(Owner& owner) {
     double price=0;
     int choice=-1;
-    while (choice!=5 && choice!=6) {
+    while (choice!=5) {
         std::cout<<"1"<<meat<<"\n";
         std::cout<<"2"<<fruits<<"\n";
         std::cout<<"3"<<vegetables<<"\n";
         std::cout<<"4"<<treats<<"\n";
         std::cout<<"5 Abandon cart and exit\n";
         std::cout<<"6 Buy\n";
+        std::cout<<"Select your action\n";
         std::cin>>choice;
 
         switch (choice) {
             case 1: {
+                std::cout<<"Choose meat type";
                 std::cout<<"1. Chicken   "<<"2. Beef   "<<"3. Fish   "<<"4. Turkey\n";
                 int meatChoice;
                 std::cin>>meatChoice;
@@ -348,7 +364,8 @@ void Shop::goShopping() {
                 break;
             }
             case 2: {
-                std::cout<<"1. Apple   "<<"2. Banana   "<<"3. Strawberry   "<<"4. Peach\n";
+                std::cout<<"Select fruit:";
+                std::cout<<"1. Blueberry   "<<"2. Banana   "<<"3. Strawberry   "<<"4. Peach\n";
                 int fruitChoice;
                 std::cin>>fruitChoice;
                 switch (fruitChoice){
@@ -361,6 +378,7 @@ void Shop::goShopping() {
                 break;
             }
             case 3:{
+                std::cout<<"Choose your veggies";
                 std::cout<<"1. Tomato   "<<"2. Cucumber   "<<"3. Carrot   "<<"4. Potato\n";
                 int veggieChoice;
                 std::cin>>veggieChoice;
@@ -374,6 +392,7 @@ void Shop::goShopping() {
                 break;
             }
             case 4: {
+                std::cout<<"Buy some treats";
                 std::cout<<"1. Biscuit   "<<"2. Dental_Chews   "<<"3. Jerky   "<<"4. Cake\n";
                 int treatsChoice;
                 std::cin>>treatsChoice;
@@ -387,12 +406,25 @@ void Shop::goShopping() {
                 break;
             }
             case 5: {
-                std::cout<<"Exiting shop..";
+                std::cout<<"Exiting shop..\n";
                 shoppingCart.clear();
                 price=0;
                 break;
             }
-
+            case 6: {
+                if(owner.getCoins()<price)
+                    std::cout<<"Not enough money\n";
+                else {
+                    this->income+=price;
+                    owner.setCoins(owner.getCoins()-price);
+                    owner.addToInventory(shoppingCart);
+                    std::cout<<"Thank you! Remaining:"<<owner.getCoins()<<"\n";
+                    price=0;
+                    shoppingCart.clear();
+                    choice=-1;
+                }
+                break;
+            }
             default: {
                 std::cout<<"Invalid choice\n";
                 break;
@@ -407,5 +439,4 @@ void Shop::addToCart(std::string item, int price,double &totalPrice) {
 }
 
 int main() {
-
 }
