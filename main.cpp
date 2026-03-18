@@ -8,7 +8,6 @@ private:
     const std::string breed;
     float age;
     const std::string type;
-    static int interactions;
     int happiness;
     int energy;
     int health;
@@ -38,8 +37,6 @@ public:
     const char* getName() const;
 
 };
-
-int Pet::interactions=0;
 
  Pet::Pet() :breed("N/A"),type("N/A") {
      this->name = strcpy(new char[4], "N/A");
@@ -506,12 +503,37 @@ void Shop::addToCart(std::string item, int price,double &totalPrice) {
 class Games{
 private:
     double reward;
+    static int Highscore;
+    int energyCost;
 public:
     Games();
-    Games(double);
+    Games(double, int);
     Games(const Games &obj);
     Games& operator=(const Games &obj);
+    ~Games();
 };
 
+Games::Games() {
+    this->reward=0.0;
+    this->energyCost=0;
+}
+Games::Games(double reward, int energyCost) {
+    this->reward=reward;
+    this->energyCost=energyCost;
+}
+Games::Games(const Games &obj) {
+    this->reward=obj.reward;
+    this->energyCost=obj.energyCost;
+}
+Games& Games::operator=(const Games &obj) {
+    if(this==&obj) return *this;
+    this->reward=obj.reward;
+    this->energyCost=obj.energyCost;
+    return *this;
+}
+Games::~Games() {
+
+}
+int Games::Highscore=0;
 int main() {
 }
