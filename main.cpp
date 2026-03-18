@@ -31,6 +31,12 @@ public:
     void ShowStatus();
     int getHealth() const;
     void setHealth(int health);
+    int getEnergy() const;
+    void setEnergy(int energy);
+    int getHappiness() const;
+    void setHappiness(int happiness);
+    const char* getName() const;
+
 };
 
 int Pet::interactions=0;
@@ -183,6 +189,26 @@ void Pet::setHealth(int health) {
      this->health=health;
      CheckLimits();
  }
+int Pet::getEnergy() const {
+     return energy;
+ }
+void Pet::setEnergy(int energy) {
+     this->energy=energy;
+     CheckLimits();
+ }
+
+int Pet::getHappiness() const {
+    return happiness;
+}
+
+void Pet::setHappiness(int happiness) {
+    this->happiness=happiness;
+     CheckLimits();
+}
+
+const char* Pet::getName() const{
+    return name;
+}
 class Owner {
  private:
      std::string name;
@@ -245,12 +271,17 @@ void Owner::cuddleIt() {
 }
 void Owner::giveMedicine() {
     if (myPet!=nullptr){
-        if (coins>=100.0) {
-            coins-=100.0;
-            myPet->setHealth(100);
-            std::cout<<name<<" is feeling better now."<<std::endl;
+        if (myPet->getHealth()<50) {
+            if (coins>=500) {
+                coins-=500;
+                myPet->setHealth(100);
+                myPet->setEnergy(100);
+                myPet->setHappiness(100);
+                std::cout<<"Health, Energy and Happiness are back to 100%.\n";
+            }
+            else std::cout<<"not enough money!"<<std::endl;
         }
-        else std::cout<<"not enough money!"<<std::endl;
+        else std::cout<<myPet->getName()<<" is heakthy enough, doesn't need medicine\n";
     }
 }
 
@@ -267,13 +298,13 @@ private:
     static const int fruits_price=13;
     static const int vegetables_price=15;
     static const int treats_price=25;
+    void addToCart(std::string item,int price, double &totalPrice);
 public:
     Shop();
     Shop(double);
     Shop(const Shop &obj);
     Shop& operator=(const Shop &obj);
     void goShopping();
-    void addToCart(std::string item,int price, double &totalPrice);
 };
 Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"){
     this->income=0.0;
@@ -355,6 +386,13 @@ void Shop::goShopping() {
                 }
                 break;
             }
+            case 5: {
+                std::cout<<"Exiting shop..";
+                shoppingCart.clear();
+                price=0;
+                break;
+            }
+
             default: {
                 std::cout<<"Invalid choice\n";
                 break;
