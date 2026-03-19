@@ -8,8 +8,8 @@ class Pet{
 private:
     char* name;
     const std::string breed;
-    float age;
-    const std::string type;
+    float* age;
+    char gender;
     int happiness;
     int energy;
     int health;
@@ -22,7 +22,7 @@ private:
 
 public:
     Pet();
-    Pet(char*,std::string,float,std::string);
+    Pet(char*,std::string,float*,char);
     Pet(const Pet &obj);
     Pet& operator=(const Pet &obj);
     ~Pet();
@@ -37,37 +37,42 @@ public:
     int getHappiness() const;
     void setHappiness(int happiness);
     const char* getName() const;
+    int getHunger() const;
+    void setHunger(int hunger);
 
 };
 
- Pet::Pet() :breed("N/A"),type("N/A") {
+ Pet::Pet() :breed("N/A") {
      this->name = strcpy(new char[4], "N/A");
      isAlive=true;
-     age=0.0;
+     this->age=new float(0.0);
+     this->gender='X';
      happiness=100;
      energy=100;
      health=100;
      hunger=0;
  }
 
-Pet::Pet(char* name, std::string breed, float age, std::string type): breed(breed), type(type){
+Pet::Pet(char* name, std::string breed, float* age,char gender): breed(breed){
     this -> name = strcpy(new char[strlen(name)+1],name);
      isAlive=true;
-     this->age=age;
-     happiness=100;
-     energy=100;
-     health=100;
-     hunger=0;
+     this->age=new float(*age);
+     this->gender=gender;
+     this->happiness=100;
+     this->energy=100;
+     this->health=100;
+     this->hunger=0;
  }
 
-Pet::Pet(const Pet &obj): breed(obj.breed), type(obj.type){
+Pet::Pet(const Pet &obj): breed(obj.breed){
      this -> name = strcpy(new char[strlen(obj.name)+1], obj.name);
      this->isAlive=obj.isAlive;
-     this->age=obj.age;
-     happiness=100;
-     health=100;
-     energy =100;
-     hunger=0;
+     this->age= new float(*(obj.age));
+     this->gender=obj.gender;
+     happiness=obj.happiness;
+     health=obj.health;
+     energy=obj.energy;
+     hunger=obj.hunger;
  }
 
 Pet& Pet::operator=(const Pet &obj){
@@ -77,9 +82,10 @@ Pet& Pet::operator=(const Pet &obj){
      delete[] this -> name;
      this -> name=new char[strlen(obj.name)+1];
      strcpy(this ->name,obj.name);
-
+     delete age;
+     this ->age=new float(*(obj.age));
+     this->gender=obj.gender;
      this->isAlive=obj.isAlive;
-     this->age=obj.age;
      happiness=obj.happiness;
      health=obj.health;
      energy=obj.energy;
@@ -93,18 +99,22 @@ Pet::~Pet() {
          delete[] name;
          name=nullptr;
      }
+     if (age!=nullptr) {
+         delete age;
+         age=nullptr;
+     }
  }
 //Pet functions
 void Pet::eat(std::string foodChoice) {
      if (foodChoice=="Chicken" || foodChoice=="Turkey" || foodChoice=="Beef" || foodChoice=="Fish") {
          hunger-=30;
          health+=20;
-         energy+=15;
+         energy+=20;
      }
      else if (foodChoice=="Strawberry" || foodChoice=="Banana" || foodChoice=="Blueberry" || foodChoice=="Peach") {
-         hunger-=15;
+         hunger-=18;
          health+=10;
-         energy+=15;
+         energy+=20;
      }
      else if (foodChoice=="Carrot" || foodChoice=="Tomato" || foodChoice=="Potato" || foodChoice=="Cucumber") {
          hunger-=25;
@@ -125,7 +135,8 @@ void Pet::sleep() {
      energy+=25;
      health+=10;
      hunger+=5;
-     std::cout<<name<<" is awake now. [ HG:+5 EN:+25 , HP:+10\n";
+     (*age)+=0.1;
+     std::cout<<name<<" is awake now";
      CheckLimits();
      ShowWarnings();
      CheckDeath();
@@ -134,7 +145,7 @@ void Pet::sleep() {
 void Pet::cuddle() {
     happiness+=20;
     energy-=5;
-     std::cout<<"You spent some quality time with "<<name<<"."<<"  [ HAPPY:+20 , EN:-5 ] \n";
+     std::cout<<"You spent some quality time with "<<name;
      CheckLimits();
      ShowWarnings();
      CheckDeath();
@@ -187,13 +198,9 @@ void Pet::ShowWarnings() {
 }
 
 void Pet::ShowStatus() {
-     std::cout<<"PET STATUS: "<<name<<std::endl;
-     std::cout<<" --------------------"<<std::endl;
-     std::cout<<"|  Health  :  "<<health<<"/100 "<<std::endl;
-     std::cout<<"|  Hunger  :  "<<hunger<<"/100 "<<std::endl;
-     std::cout<<"|  Energy  :  "<<energy<<"/100 "<<std::endl;
-     std::cout<<"|  Happy   :  "<<happiness<<"/100 "<<std::endl;
-     std::cout<<" --------------------"<<std::endl;
+     std::cout<<"PET STATUS: "<<name<<" "<<(*age)<<" years "<<std::endl;
+     std::cout<<"|HP :"<<health<<"/100 "<<"| EN :"<<energy<<"/100 "<<"| HG :"<<hunger<<"/100 "<<"| HAPPY"<<happiness<<"/100 "<<std::endl;;
+
  }
 //setters and getters
 int Pet::getHealth() const {
@@ -219,6 +226,13 @@ void Pet::setHappiness(int happiness) {
     this->happiness=happiness;
      CheckLimits();
 }
+int Pet::getHunger() const{
+     return hunger;
+}
+void Pet::setHunger(int hunger) {
+     this->hunger=hunger;
+     CheckLimits();
+ }
 
 const char* Pet::getName() const{
     return name;
@@ -518,9 +532,10 @@ public:
     Games(const Games &obj);
     Games& operator=(const Games &obj);
     ~Games();
+    bool CheckEnergy(Pet&);
     void selectQuestions();
-    void GuessTheNumber();
-    void playTrivia(Owner&);
+    void GuessTheNumber(Owner&, Pet&);
+    void playTrivia(Owner&, Pet&);
 };
 
 Games::Games() {
@@ -546,6 +561,14 @@ Games::~Games() {
 }
 long Games::Highscore=0;
 
+bool Games::CheckEnergy(Pet& myPet) {
+    if (myPet.getEnergy()<this->energyCost) {
+        std::cout<<myPet.getName()<<" is too tired"<<"(Energy < "<<energyCost<<" )\n";
+        return false;
+    }
+    return true;
+}
+
 void Games::selectQuestions() {
     questions={
         {"How many eyerbows does Mona Lisa have?", "0"},
@@ -563,13 +586,16 @@ void Games::selectQuestions() {
     };
 }
 
-void Games::playTrivia(Owner& owner) {
+void Games::playTrivia(Owner& owner, Pet& myPet) {
+    if (!CheckEnergy(myPet)) return;
     std::cout<<"Welcome to trivia!\n";
     std::cout<<"Press 1 to start the game or 0 to exit\n";
     int choice=-1;
-    int lastChoice=-1;
     std::cin>>choice;
     while (choice!=0 and choice==1) {
+        myPet.setEnergy(myPet.getEnergy()-this->energyCost);
+        myPet.setHappiness(myPet.getHappiness()+this->energyCost/2);
+        myPet.setHunger(myPet.getHunger()+this->energyCost*2);
         int score=0;
         for (int i=0;i<3;i++) {
             int randomIndex=rand() % questions.size();
@@ -586,16 +612,105 @@ void Games::playTrivia(Owner& owner) {
             }
             else std::cout<<"Wrong!\n";
         }
-        owner.setCoins(owner.getCoins() + score*20);
-        if (score) std::cout<<"You won "<<score*20<<" coins\n";
+        double gameReward=0;
+        gameReward=score*this->reward;
+        owner.setCoins(owner.getCoins() + gameReward);
+        if (gameReward>0) std::cout<<"You won "<<gameReward<<" coins\n";
         else std::cout<<"Your score is 0. Better luck next time!\n";
+        if (gameReward>Highscore) {
+            Highscore=gameReward;
+            std::cout<<"Your highest income is "<<Highscore<<"\n";
+        }
+        if (!CheckEnergy(myPet)) break;
         std::cout<<"Press 1 to play again or 0 to exit\n";
-        std::cin>>lastChoice;
-        choice=lastChoice;
+        std::cin>>choice;
     }
     std::cout<<"Exiting trivia\n";
 }
 
+void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
+    if (!CheckEnergy(myPet)) return;
+    std::cout<<"Welcome to Guess the number!\n";
+    std::cout<<"Press 1 to start the game or 0 to exit\n";
+    int choice=-1;
+    int lastChoice=-1;
+    std::cin>>choice;
+    while (choice!=0 && choice==1) {
+        myPet.setEnergy(myPet.getEnergy()-this->energyCost);
+        myPet.setHappiness(myPet.getHappiness()+this->energyCost/2);
+        myPet.setHunger(myPet.getHunger()+this->energyCost*2);
+        int gameReward=0;
+        std::cout<<"Choose your level of difficulty\n";
+        std::cout<<"|  1. Easy  |  "<<"|  2. Medium  |  "<<"|  3. Hard  |\n";
+        int difficultyLevel;
+        std::cin>>difficultyLevel;
+        switch (difficultyLevel) {
+            case 1: {
+                std::cout<<"Guess the number between 1 and 10. You have 10 chances\n";
+                int randomNo=rand() % 10 +1;
+                for (int i=0;i<10;i++) {
+                    int guess;
+                    std::cin>>guess;
+                    if (guess==randomNo) {
+                        gameReward=this->reward*4 - i*4;
+                        if (gameReward<0) gameReward=0;
+                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        owner.setCoins(owner.getCoins()+gameReward);
+                        break;
+                    }
+                }
+                break;
+            }
+            case 2: {
+                std::cout<<"Guess the number between 1 and 50\nYou have 12 chances\n";
+                int randomNo=rand() % 50 +1;
+                for (int i=0;i<12;i++) {
+                    int guess;
+                    std::cin>>guess;
+                    if (guess==randomNo) {
+                        gameReward=this->reward*15 - i*8;
+                        if (gameReward<0) gameReward=0;
+                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        owner.setCoins(owner.getCoins()+gameReward);
+                        break;
+                    }
+                    else if (guess<randomNo) std::cout<<"The number is higher than"<<guess<<"\n";
+                    else if (guess>randomNo) std::cout<<"The number is lower than"<<guess<<"\n";
+                }
+                if (gameReward==0) std::cout<<"You ran out of chances. Better luck next time!\n";
+                break;
+            }
+            case 3: {
+                std::cout<<"Guess the number between 1 and 150\nYou have 6 chances\n";
+                int randomNo=rand() % 150 +1;
+                for (int i=0;i<6;i++) {
+                    int guess;
+                    std::cin>>guess;
+                    if (guess==randomNo) {
+                        gameReward=this->reward*30 - i*10;
+                        if (gameReward<0) gameReward=0;
+                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        owner.setCoins(owner.getCoins()+gameReward);
+                        break;
+                    }
+                    else if (guess<randomNo) std::cout<<"The number is higher than"<<guess<<"\n";
+                    else if (guess>randomNo) std::cout<<"The number is lower than"<<guess<<"\n";
+                }
+                if (gameReward==0) std::cout<<"You ran out of chances. Better luck next time!\n";
+                break;
+            }
+        }
+        if (!CheckEnergy(myPet)) break;
+        if (gameReward>Highscore) {
+            Highscore=gameReward;
+            std::cout<<"Your highest income is "<<Highscore<<"\n";
+        }
+        std::cout<<"Press 1 to play again or 0 to exit\n";
+        std::cin>>lastChoice;
+        choice=lastChoice;
+        if (choice==0) std::cout<<"Exiting game\n";
+    }
+}
 int main() {
 
 }
