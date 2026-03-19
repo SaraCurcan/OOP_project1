@@ -2,6 +2,8 @@
 #include <cstring>
 #include <string>
 #include<vector>
+#include<ctime>
+#include<cstdlib>
 class Pet{
 private:
     char* name;
@@ -92,7 +94,7 @@ Pet::~Pet() {
          name=nullptr;
      }
  }
-
+//Pet functions
 void Pet::eat(std::string foodChoice) {
      if (foodChoice=="Chicken" || foodChoice=="Turkey" || foodChoice=="Beef" || foodChoice=="Fish") {
          hunger-=30;
@@ -193,7 +195,7 @@ void Pet::ShowStatus() {
      std::cout<<"|  Happy   :  "<<happiness<<"/100 "<<std::endl;
      std::cout<<" --------------------"<<std::endl;
  }
-
+//setters and getters
 int Pet::getHealth() const {
      return health;
  }
@@ -302,14 +304,14 @@ void Owner::giveMedicine() {
         else std::cout<<myPet->getName()<<" is heakthy enough, doesn't need medicine\n";
     }
 }
-
+//setters and getters
 double Owner::getCoins() const {
     return coins;
 }
 void Owner::setCoins(double coins) {
     this->coins=coins;
 }
-
+//Owner functions
 void Owner::addToInventory(const std::vector<std::string>& items) {
     inventory.insert(inventory.end(),items.begin(),items.end());
 }
@@ -387,15 +389,14 @@ Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"
 Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"){
     this->income=obj.income;
 }
-Shop::~Shop() {
-
-}
 Shop& Shop::operator=(const Shop &obj) {
     if (this==&obj) return *this;
     this->income=obj.income;
     return *this;
 }
+Shop::~Shop() {
 
+}
 void Shop::goShopping(Owner& owner) {
     double price=0;
     int choice=-1;
@@ -500,17 +501,26 @@ void Shop::addToCart(std::string item, int price,double &totalPrice) {
     totalPrice+=price;
 }
 
+struct questionsArray {
+    std::string question;
+    std::string answer;
+};
 class Games{
 private:
     double reward;
-    static int Highscore;
+    static long Highscore;
     int energyCost;
+    std::vector<questionsArray> questions;
+
 public:
     Games();
     Games(double, int);
     Games(const Games &obj);
     Games& operator=(const Games &obj);
     ~Games();
+    void selectQuestions();
+    void GuessTheNumber();
+    void playTrivia(Owner&);
 };
 
 Games::Games() {
@@ -534,6 +544,58 @@ Games& Games::operator=(const Games &obj) {
 Games::~Games() {
 
 }
-int Games::Highscore=0;
+long Games::Highscore=0;
+
+void Games::selectQuestions() {
+    questions={
+        {"How many eyerbows does Mona Lisa have?", "0"},
+        {"What is the national animal of India?", "bengal tiger"},
+        {"What color is a polar bear skin?", "black"},
+        {"What does Hakuna matata means?", "bo worries"},
+        {"How many layers of skin does a cameleon have?","4"},
+        {"Where did christmas originate?", "rome"},
+        {"What year was the first Grammy Awards held?","1959"},
+        {"What is the capital of Australia?","canberra"},
+        {"Which ancient civilization is credited with creating the first known writing system?","sumerians"},
+        {"Which Greek philosopher is known for his method of questioning as a form of teaching?", "socrates"},
+        {"What is the only U.S state that does not have a sales tax?","alaska"},
+
+    };
+}
+
+void Games::playTrivia(Owner& owner) {
+    std::cout<<"Welcome to trivia!\n";
+    std::cout<<"Press 1 to start the game or 0 to exit\n";
+    int choice=-1;
+    int lastChoice=-1;
+    std::cin>>choice;
+    while (choice!=0 and choice==1) {
+        int score=0;
+        for (int i=0;i<3;i++) {
+            int randomIndex=rand() % questions.size();
+            std::cout<<i+1<<". "<<questions[randomIndex].question<<"\n";
+            std::cout<<"Write your answer:\n";
+            std::string userAnswer;
+            std::cin>>userAnswer;
+            for (int c=0;c<userAnswer.length();c++) {
+                userAnswer[c]=std::tolower(userAnswer[c]);
+            }
+            if (userAnswer==questions[randomIndex].answer) {
+                score++;
+                std::cout<<"Correct!\n";
+            }
+            else std::cout<<"Wrong!\n";
+        }
+        owner.setCoins(owner.getCoins() + score*20);
+        if (score) std::cout<<"You won "<<score*20<<" coins\n";
+        else std::cout<<"Your score is 0. Better luck next time!\n";
+        std::cout<<"Press 1 to play again or 0 to exit\n";
+        std::cin>>lastChoice;
+        choice=lastChoice;
+    }
+    std::cout<<"Exiting trivia\n";
+}
+
 int main() {
+
 }
