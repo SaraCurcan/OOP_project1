@@ -246,7 +246,7 @@ class Owner {
      std::vector<std::string> inventory;
  public:
      Owner();
-     Owner(std::string, int, double,Pet*);
+     Owner(std::string, int, double,Pet*,std::vector<std::string>);
      Owner(const Owner &obj);
      Owner& operator=(const Owner &obj);
      ~Owner();
@@ -269,26 +269,36 @@ Owner::Owner() {
     this->myPet=nullptr;
 }
 
-Owner::Owner(std::string name, int age, double coins,Pet* myPet) {
+Owner::Owner(std::string name, int age, double coins,Pet* myPet,std::vector<std::string> inventory) {
     this->name=name;
     this->age=age;
     this->coins=coins;
     this->myPet=myPet;
+    this->inventory=inventory;
 }
 
 Owner::Owner(const Owner &obj) {
     this->name=obj.name;
     this->age=obj.age;
     this->coins=obj.coins;
-    this->myPet=obj.myPet;
+    this->inventory=obj.inventory;
+    if (obj.myPet!=nullptr) {
+        this->myPet=new Pet(*(obj.myPet));
+    }
+    else this->myPet=nullptr;
 }
 
 Owner& Owner::operator=(const Owner &obj) {
     if (this==&obj) return *this;
+    delete this->myPet;
     this->name=obj.name;
     this->age=obj.age;
     this->coins=obj.coins;
-    this->myPet=obj.myPet;
+    this->inventory=obj.inventory;
+    if (obj.myPet!=nullptr) {
+        this->myPet=new Pet(*(obj.myPet));
+    }
+    else this->myPet=nullptr;
     return *this;
 }
 
@@ -528,7 +538,7 @@ private:
 
 public:
     Games();
-    Games(double, int);
+    Games(double, int,std::vector<questionsArray>);
     Games(const Games &obj);
     Games& operator=(const Games &obj);
     ~Games();
@@ -541,19 +551,23 @@ public:
 Games::Games() {
     this->reward=0.0;
     this->energyCost=0;
+    this->questions={};
 }
-Games::Games(double reward, int energyCost) {
+Games::Games(double reward, int energyCost,std::vector<questionsArray> questions) {
     this->reward=reward;
     this->energyCost=energyCost;
+    this->questions=questions;
 }
 Games::Games(const Games &obj) {
     this->reward=obj.reward;
     this->energyCost=obj.energyCost;
+    this->questions=obj.questions;
 }
 Games& Games::operator=(const Games &obj) {
     if(this==&obj) return *this;
     this->reward=obj.reward;
     this->energyCost=obj.energyCost;
+    this->questions=obj.questions;
     return *this;
 }
 Games::~Games() {
