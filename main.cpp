@@ -15,6 +15,8 @@ private:
     int health;
     int hunger;
     bool isAlive;
+    const int id;
+    static int noInstance;
 
     void CheckDeath();
     void CheckLimits();
@@ -39,10 +41,11 @@ public:
     const char* getName() const;
     int getHunger() const;
     void setHunger(int hunger);
-
+    static int getnoInstance();
+    int getId() const;
 };
-
- Pet::Pet() :breed("N/A") {
+int Pet::noInstance=0;
+ Pet::Pet() :breed("N/A"), id(++noInstance) {
      this->name = strcpy(new char[4], "N/A");
      isAlive=true;
      this->age=new float(0.0);
@@ -53,7 +56,7 @@ public:
      hunger=0;
  }
 
-Pet::Pet(char* name, std::string breed, float* age,char gender): breed(breed){
+Pet::Pet(char* name, std::string breed, float* age,char gender): breed(breed), id(++noInstance){
     this -> name = strcpy(new char[strlen(name)+1],name);
      isAlive=true;
      this->age=new float(*age);
@@ -64,7 +67,7 @@ Pet::Pet(char* name, std::string breed, float* age,char gender): breed(breed){
      this->hunger=0;
  }
 
-Pet::Pet(const Pet &obj): breed(obj.breed){
+Pet::Pet(const Pet &obj): breed(obj.breed), id(++noInstance){
      this -> name = strcpy(new char[strlen(obj.name)+1], obj.name);
      this->isAlive=obj.isAlive;
      this->age= new float(*(obj.age));
@@ -237,6 +240,15 @@ void Pet::setHunger(int hunger) {
 const char* Pet::getName() const{
     return name;
 }
+
+int Pet::getnoInstance() {
+    return noInstance;
+}
+
+int Pet::getId() const {
+    return id;
+}
+
 class Owner {
  private:
      std::string name;
@@ -244,6 +256,8 @@ class Owner {
      double coins;
      Pet* myPet;
      std::vector<std::string> inventory;
+     const int id;
+     static int noInstance;
  public:
      Owner();
      Owner(std::string, int, double,Pet*,std::vector<std::string>);
@@ -259,17 +273,21 @@ class Owner {
     void addToInventory(const std::vector<std::string>& items);
      void ShowInventory() const;
      void removeFood(std::string item);
+     static int getnoInstance();
+     int getId() const;
 
  };
 
-Owner::Owner() {
+int Owner::noInstance=0;
+
+Owner::Owner(): id(++noInstance) {
     this->name="N/A";
     this->age=0;
     this->coins=100.0;
     this->myPet=nullptr;
 }
 
-Owner::Owner(std::string name, int age, double coins,Pet* myPet,std::vector<std::string> inventory) {
+Owner::Owner(std::string name, int age, double coins,Pet* myPet,std::vector<std::string> inventory): id(++noInstance) {
     this->name=name;
     this->age=age;
     this->coins=coins;
@@ -277,7 +295,7 @@ Owner::Owner(std::string name, int age, double coins,Pet* myPet,std::vector<std:
     this->inventory=inventory;
 }
 
-Owner::Owner(const Owner &obj) {
+Owner::Owner(const Owner &obj):id(++noInstance) {
     this->name=obj.name;
     this->age=obj.age;
     this->coins=obj.coins;
@@ -396,6 +414,8 @@ private:
     static const int vegetables_price=15;
     static const int treats_price=25;
     void addToCart(std::string item,int price, double &totalPrice);
+    const int id;
+    static int noInstance;
 public:
     Shop();
     Shop(double);
@@ -404,13 +424,13 @@ public:
     ~Shop();
     void goShopping(Owner& owner);
 };
-Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"){
+Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"), id(++noInstance){
     this->income=0.0;
 }
-Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats") {
+Shop::Shop(double income):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"), id(++noInstance) {
     this->income=income;
 }
-Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"){
+Shop::Shop(const Shop &obj):meat("Meat"), fruits("Fruits"),vegetables("Vegetables"), treats("Treats"), id(++noInstance){
     this->income=obj.income;
 }
 Shop& Shop::operator=(const Shop &obj) {
@@ -535,6 +555,8 @@ private:
     static long Highscore;
     int energyCost;
     std::vector<questionsArray> questions;
+    const int id;
+    static int noInstance;
 
 public:
     Games();
@@ -548,17 +570,17 @@ public:
     void playTrivia(Owner&, Pet&);
 };
 
-Games::Games() {
+Games::Games():id(++noInstance) {
     this->reward=0.0;
     this->energyCost=0;
     this->questions={};
 }
-Games::Games(double reward, int energyCost,std::vector<questionsArray> questions) {
+Games::Games(double reward, int energyCost,std::vector<questionsArray> questions): id(++noInstance) {
     this->reward=reward;
     this->energyCost=energyCost;
     this->questions=questions;
 }
-Games::Games(const Games &obj) {
+Games::Games(const Games &obj): id(++noInstance) {
     this->reward=obj.reward;
     this->energyCost=obj.energyCost;
     this->questions=obj.questions;
@@ -602,7 +624,9 @@ void Games::selectQuestions() {
 
 void Games::playTrivia(Owner& owner, Pet& myPet) {
     if (!CheckEnergy(myPet)) return;
+    std::cout<<"game id "<< this->id<<"\n";
     std::cout<<"Welcome to trivia!\n";
+    std::cout<<"Current income score is "<<Highscore<<"\n";
     std::cout<<"Press 1 to start the game or 0 to exit\n";
     int choice=-1;
     std::cin>>choice;
@@ -633,7 +657,6 @@ void Games::playTrivia(Owner& owner, Pet& myPet) {
         else std::cout<<"Your score is 0. Better luck next time!\n";
         if (gameReward>Highscore) {
             Highscore=gameReward;
-            std::cout<<"Your highest income is "<<Highscore<<"\n";
         }
         if (!CheckEnergy(myPet)) break;
         std::cout<<"Press 1 to play again or 0 to exit\n";
@@ -644,7 +667,9 @@ void Games::playTrivia(Owner& owner, Pet& myPet) {
 
 void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
     if (!CheckEnergy(myPet)) return;
+    std::cout<<"game id "<< this->id<<"\n";
     std::cout<<"Welcome to Guess the number!\n";
+    std::cout<<"Current highest income is "<<Highscore<<"\n";
     std::cout<<"Press 1 to start the game or 0 to exit\n";
     int choice=-1;
     int lastChoice=-1;
@@ -717,7 +742,6 @@ void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
         if (!CheckEnergy(myPet)) break;
         if (gameReward>Highscore) {
             Highscore=gameReward;
-            std::cout<<"Your highest income is "<<Highscore<<"\n";
         }
         std::cout<<"Press 1 to play again or 0 to exit\n";
         std::cin>>lastChoice;
