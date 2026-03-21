@@ -189,21 +189,25 @@ void Pet::ShowWarnings() {
         std::cout<<"WARNING: "<<name<<"'s health is not good"<<std::endl;
      if (hunger>=75) {
          std::cout<<"WARNING: "<<name<<" is starving! Feed it soon."<<std::endl;
-         health-=40;
+         setHealth(health-40);
      }
      if (energy<=10) {
          std::cout<<"WARNING: "<<name<<" is really tired"<<std::endl;
-         health-=40;
+         setHealth(health-40);
      }
      if (happiness<=10) {
          std::cout<<"WARNING: "<<name<<" is sad. Cuddle or play with him"<<std::endl;
-         health-=10;
+         setHealth(health-10);
      }
 }
 
 void Pet::ShowStatus() {
-     std::cout<<"PET STATUS: "<<name<<" "<<(*age)<<" years "<<std::endl;
-     std::cout<<"|HP :"<<health<<"/100 "<<"| EN :"<<energy<<"/100 "<<"| HG :"<<hunger<<"/100 "<<"| HAPPY"<<happiness<<"/100 "<<std::endl;;
+     std::cout<<std::endl;
+     std::cout<<"======================================================\n";
+     std::cout<<"|"<<"PET STATUS: "<<name<<" "<<" , "<<gender<<" , "<<(*age)<<" years "<<std::endl;
+     std::cout<<"|HP :"<<health<<"/100 "<<"| EN :"<<energy<<"/100 "<<"| HG :"<<hunger<<"/100 "<<"| HAPPY"<<happiness<<"/100 "<<std::endl;
+     std::cout<<"======================================================\n";
+     std::cout<<std::endl;
 
  }
 //setters and getters
@@ -262,12 +266,15 @@ class Owner {
      std::string name;
      double coins;
      Pet* myPet;
-     std::vector<std::string> inventory;
+     std::string* inventory;
+     int noItems;
+     int size;
      const int id;
      static int noInstance;
+     void removeFood(std::string item);
  public:
      Owner();
-     Owner(std::string, double,Pet*,std::vector<std::string>);
+     Owner(std::string, double,Pet*,std::string*,int,int);
      Owner(const Owner &obj);
      Owner& operator=(const Owner &obj);
      ~Owner();
@@ -279,7 +286,6 @@ class Owner {
      void setCoins(double coins);
     void addToInventory(const std::vector<std::string>& items);
      void ShowInventory() const;
-     void removeFood(std::string item);
      static int getnoInstance();
      int getId() const;
      const std::string getName() const;
@@ -293,40 +299,64 @@ Owner::Owner(): id(++noInstance) {
     this->name="N/A";
     this->coins=100.0;
     this->myPet=nullptr;
+    this->noItems=0;
+    this->size=4;
+    this->inventory=new std::string[this->size];
 }
 
-Owner::Owner(std::string name,double coins,Pet* myPet,std::vector<std::string> inventory): id(++noInstance) {
+Owner::Owner(std::string name,double coins,Pet* myPet,std::string* inventory,int noItems,int size): id(++noInstance) {
     this->name=name;
     this->coins=coins;
     this->myPet=myPet;
-    this->inventory=inventory;
+    this->noItems=noItems;
+    this->size=size;
+    this->inventory=new std::string[this->size];
+    for (int i=0;i<noItems;i++)
+        this->inventory[i]=inventory[i];
 }
 
 Owner::Owner(const Owner &obj):id(++noInstance) {
     this->name=obj.name;
     this->coins=obj.coins;
-    this->inventory=obj.inventory;
+    this->noItems=obj.noItems;
+    this->size=obj.size;
     if (obj.myPet!=nullptr) {
         this->myPet=new Pet(*(obj.myPet));
     }
     else this->myPet=nullptr;
+   if (obj.inventory!=nullptr) {
+       this->inventory=new std::string[this->size];
+       for (int i=0;i<noItems;i++) {
+           this->inventory[i]=obj.inventory[i];
+       }
+   }
+    else this->inventory=nullptr;
 }
 
 Owner& Owner::operator=(const Owner &obj) {
     if (this==&obj) return *this;
     delete this->myPet;
+    delete[] this->inventory;
     this->name=obj.name;
     this->coins=obj.coins;
-    this->inventory=obj.inventory;
+    this->noItems=obj.noItems;
+    this->size=obj.size;
     if (obj.myPet!=nullptr) {
         this->myPet=new Pet(*(obj.myPet));
     }
     else this->myPet=nullptr;
+    if (obj.inventory!=nullptr) {
+        this->inventory=new std::string[this->size];
+        for (int i=0;i<noItems;i++) {
+            this->inventory[i]=obj.inventory[i];
+        }
+    }
     return *this;
 }
 
 Owner::~Owner() {
     delete myPet;
+    delete[] inventory;
 }
 
 void Owner::putToSleep() {
@@ -360,18 +390,36 @@ void Owner::setCoins(double coins) {
 }
 //Owner functions
 void Owner::addToInventory(const std::vector<std::string>& items) {
-    inventory.insert(inventory.end(),items.begin(),items.end());
+    for (int i=0;i<items.size();i++) {
+        if (noItems==size) {
+            int doubleSize;
+            if (size==0)
+                doubleSize=2;
+            else
+                doubleSize=size*2;
+            std::string* copyInventory=new std::string[doubleSize];
+            for (int j=0;j<noItems;j++)
+                copyInventory[j]=inventory[j];
+            delete[] inventory;
+            inventory=copyInventory;
+            size=doubleSize;
+        }
+    }
+    for(int i=0;i<items.size();i++) {
+        inventory[noItems]=items[i];
+        noItems++;
+    }
+
 }
 
 void Owner::ShowInventory() const {
-    if (inventory.empty()) {
+    if (noItems==0) {
         std::cout<<"Inventory is empty\n";
         return;
     }
-    for (int i=0; i<inventory.size();i++) {
-        std::cout<<inventory[i]<<",  ";
-    }
-    std::cout<<"\n";
+   for(int i=0;i<noItems;i++) {
+       std::cout<<inventory[i]<<"\n";
+   }
 }
 
 void Owner::feed() {
@@ -382,27 +430,43 @@ void Owner::feed() {
     ShowInventory();
     std::cout<<"Write your choice\n";
     std::string foodChoice;
+    int foodIndex=0;
+    std::string actualItem;
     std::cin>>foodChoice;
-    for (int i=0;i<inventory.size();i++) {
-        if (inventory[i]==foodChoice) {
+    for (int i=0;i<foodChoice.length();i++) {
+        foodChoice[i]=std::tolower(foodChoice[i]);
+    }
+    for (int i=0;i<noItems;i++) {
+        std::string smallItem=inventory[i];
+        for (int j=0;j<smallItem.length();j++)
+            smallItem[j]=std::tolower(smallItem[j]);
+        if (smallItem==foodChoice) {
             found=true;
+            foodIndex=i;
             break;
         }
-
     }
     if (found) {
-        removeFood(foodChoice);
-        myPet->eat(foodChoice);
+        std::string food=inventory[foodIndex];
+        myPet->eat(food);
+        removeFood(food);
     }
-    else std::cout<<"Choose a valid item\n";
+    else std::cout<<"Invalid item";
 }
 
 void Owner::removeFood(std::string item) {
-    for (int i=0;i<inventory.size();i++) {
+    int foodIndex=-1;
+    for (int i=0;i<noItems;i++) {
         if (item==inventory[i]) {
-            inventory.erase(inventory.begin()+i);
+            foodIndex=i;
             break;
         }
+    }
+    if (foodIndex!=-1) {
+        for (int i=foodIndex;i<noItems-1;i++) {
+            inventory[i]=inventory[i+1];
+        }
+        noItems--;
     }
 }
 const std::string Owner::getName() const{
@@ -461,12 +525,12 @@ void Shop::goShopping(Owner& owner) {
     int choice=-1;
     while (choice!=5) {
         std::cout<<"WELCOME! What do you eant to buy?\n";
-        std::cout<<"1"<<meat<<"\n";
-        std::cout<<"2"<<fruits<<"\n";
-        std::cout<<"3"<<vegetables<<"\n";
-        std::cout<<"4"<<treats<<"\n";
-        std::cout<<"5 Abandon cart and exit\n";
-        std::cout<<"6 Buy\n";
+        std::cout<<"1. "<<meat<<"\n";
+        std::cout<<"2. "<<fruits<<"\n";
+        std::cout<<"3. "<<vegetables<<"\n";
+        std::cout<<"4. "<<treats<<"\n";
+        std::cout<<"5. Abandon cart and exit\n";
+        std::cout<<"6. Buy\n";
         std::cout<<"Select your action\n";
         std::cin>>choice;
 
@@ -831,6 +895,7 @@ void Menu::changePetName() {
 
 void Menu::interract() {
     while (true) {
+        this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
         std::cout<<"1. Feed "<<this->owner->getPet()->getName()<<"\n";
         std::cout<<"2. Cuddle "<<this->owner->getPet()->getName()<<"\n";
         std::cout<<"3. Give medicine\n";
@@ -849,9 +914,10 @@ void Menu::interract() {
     }
 }
 void Menu::ownerItems() {
-    std::cout<<"Your inventory:\n";
+    std::cout<<this->owner->getName()<<"'s inventory:\n";
     this->owner->ShowInventory();
     std::cout<<"Your coins: "<<this->owner->getCoins()<<" coins\n";
+    std::cout<<std::endl;
 }
 
 void Menu::GoToShop() {
@@ -860,6 +926,7 @@ void Menu::GoToShop() {
 
 void Menu::GoToGames() {
     while (true) {
+        this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
         std::cout<<"1. Play trivia\n";
         std::cout<<"2. Play Guess the number\n";
         std::cout<<"3. back to menu\n";
@@ -870,8 +937,6 @@ void Menu::GoToGames() {
             case 2: this->GuessTheNumber.GuessTheNumber(*(this->owner),*(this->owner->getPet())); break;
             case 3: return;
             default: std::cout<<"Invalid choice\n";break;
-
-
         }
     }
 
@@ -882,7 +947,7 @@ void Menu::startGame() {
         delete this->owner;
     }
    std::string ownerName, petBreed;
-    char gender;
+    char gender='x';
     char petName[25];
     float age=0.0;
     std::cout<<"Enter your datas \n";
@@ -892,7 +957,7 @@ void Menu::startGame() {
     std::cin>>petName;
     std::cout<<"Pet breed: ";
     std::cin>>petBreed;
-    while (gender!='M' and gender!='F') {
+    while (gender!='M' and gender!='F' and gender!='m' and gender!='f') {
         std::cout<<"Pet gender(M/F): ";
         std::cin>>gender;
         if (gender!='M' and gender!='F')
@@ -900,7 +965,11 @@ void Menu::startGame() {
     }
 
     Pet* secPet=new Pet(petName,petBreed,&age,gender);
-    this->owner=new Owner(ownerName,100.0,secPet,{"Strawberry","Biscuit"});
+    std::string* inventory=new std::string[2];
+    inventory[0]="Biscuit";
+    inventory[1]="Strawberry";
+    this->owner=new Owner(ownerName,100.0,secPet,inventory,2,4);
+    delete[] inventory;
     std::cout<<"WElCOME "<<ownerName<<"!\n";
 }
 
@@ -914,6 +983,7 @@ void Menu::InteractiveMenu() {
             startGame();
             while(true) {
                 if (this->owner!=nullptr && this->owner->getPet()!=nullptr){
+                    this->owner->getPet()->ShowStatus();;
                     std::cout<<"1. CHANGE YOUR NAME\n";
                     std::cout<<"2. CHANGE PETS'S NAME\n";
                     std::cout<<"3. INTERRACT WITH "<< this->owner->getPet()->getName()<<"\n";
@@ -946,6 +1016,7 @@ void Menu::InteractiveMenu() {
                         };
                         case 6: {
                             GoToGames();
+                            break;
                         };
                         case 7: std::cout<<"ByeBye\n"; return;
                         default: std::cout<<"Invalid choice\n";
@@ -960,5 +1031,6 @@ void Menu::InteractiveMenu() {
 }
 
 int main() {
-    
+
+
 }
