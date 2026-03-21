@@ -18,7 +18,7 @@ private:
     const int id;
     static int noInstance;
 
-    void CheckDeath();
+    bool CheckDeath();
     void CheckLimits();
     void ShowWarnings();
 
@@ -44,6 +44,7 @@ public:
     void setHunger(int hunger);
     static int getnoInstance();
     int getId() const;
+    bool getisAlive() const;
 };
 int Pet::noInstance=0;
  Pet::Pet() :breed("N/A"), id(++noInstance) {
@@ -111,23 +112,23 @@ Pet::~Pet() {
 //Pet functions
 void Pet::eat(std::string foodChoice) {
      if (foodChoice=="Chicken" || foodChoice=="Turkey" || foodChoice=="Beef" || foodChoice=="Fish") {
-         hunger-=30;
-         health+=20;
-         energy+=20;
+         setEnergy(energy+20);
+         setHealth(health+20);
+         setHunger(hunger-30);
      }
      else if (foodChoice=="Strawberry" || foodChoice=="Banana" || foodChoice=="Blueberry" || foodChoice=="Peach") {
-         hunger-=18;
-         health+=10;
-         energy+=20;
+         setEnergy(energy+18);
+         setHealth(health+10);
+         setHunger(hunger-20);
      }
      else if (foodChoice=="Carrot" || foodChoice=="Tomato" || foodChoice=="Potato" || foodChoice=="Cucumber") {
-         hunger-=25;
-         health+=15;
-         energy+=15;
+         setEnergy(energy-25);
+         setHealth(health+15);
+         setHunger(hunger-25);
      }
      else if (foodChoice=="Jerky" || foodChoice=="Biscuit" || foodChoice=="Dental_Chews" || foodChoice=="Cake") {
-         hunger-=15;
-         happiness+=15;
+         setHappiness(happiness+15);
+         setHunger(hunger-15);
      }
      std::cout<<name<<" loved this "<<foodChoice<<"\n";
      CheckLimits();
@@ -136,9 +137,9 @@ void Pet::eat(std::string foodChoice) {
  }
 
 void Pet::sleep() {
-     energy+=25;
-     health+=10;
-     hunger+=5;
+     setEnergy(energy+25);
+     setHealth(health+10);
+     setHunger(hunger+5);
      (*age)+=0.1;
      std::cout<<name<<" is awake now";
      CheckLimits();
@@ -147,19 +148,21 @@ void Pet::sleep() {
  }
 
 void Pet::cuddle() {
-    happiness+=20;
-    energy-=5;
-     std::cout<<"You spent some quality time with "<<name;
+     setHappiness(happiness+20);
+     setEnergy(energy-5);
+     std::cout<<"You spent some quality time with \n"<<name;
      CheckLimits();
      ShowWarnings();
      CheckDeath();
  }
 
-void Pet::CheckDeath() {
+bool Pet::CheckDeath() {
     if (health<=0) {
         isAlive=false;
-        std::cout<<"I'm sorry, but "<<name<<" is no longer alive. \n";
+        std::cout<<name<<" IS DEAD [HP : 0].\n";
+        return false;
     }
+     return true;
 }
 
 void Pet::CheckLimits() {
@@ -189,15 +192,12 @@ void Pet::ShowWarnings() {
         std::cout<<"WARNING: "<<name<<"'s health is not good"<<std::endl;
      if (hunger>=75) {
          std::cout<<"WARNING: "<<name<<" is starving! Feed it soon."<<std::endl;
-         setHealth(health-40);
      }
      if (energy<=10) {
          std::cout<<"WARNING: "<<name<<" is really tired"<<std::endl;
-         setHealth(health-40);
      }
      if (happiness<=10) {
          std::cout<<"WARNING: "<<name<<" is sad. Cuddle or play with him"<<std::endl;
-         setHealth(health-10);
      }
 }
 
@@ -223,6 +223,8 @@ int Pet::getEnergy() const {
  }
 void Pet::setEnergy(int energy) {
      this->energy=energy;
+     if (this->energy<=10 )
+         this->health-=30;
      CheckLimits();
  }
 
@@ -231,7 +233,9 @@ int Pet::getHappiness() const {
 }
 
 void Pet::setHappiness(int happiness) {
-    this->happiness=happiness;
+     this->happiness=happiness;
+     if (this->happiness<=10)
+         this->health-=10;
      CheckLimits();
 }
 int Pet::getHunger() const{
@@ -239,6 +243,8 @@ int Pet::getHunger() const{
 }
 void Pet::setHunger(int hunger) {
      this->hunger=hunger;
+     if (this->hunger>=80)
+         this->health-=25;
      CheckLimits();
  }
 
@@ -259,6 +265,10 @@ void Pet::setName(char *NewName) {
         delete[] this->name;
     this->name=new char[strlen(NewName)+1];
      strcpy(this->name, NewName);
+}
+
+bool Pet::getisAlive() const {
+    return isAlive;
 }
 
 class Owner {
@@ -291,6 +301,7 @@ class Owner {
      const std::string getName() const;
      void setName(std::string name);
     Pet* getPet() const;
+     void setPet(Pet* pet);
  };
 
 int Owner::noInstance=0;
@@ -369,8 +380,8 @@ void Owner::cuddleIt() {
 void Owner::giveMedicine() {
     if (myPet!=nullptr){
         if (myPet->getHealth()<50) {
-            if (coins>=500) {
-                coins-=500;
+            if (coins>=1000) {
+                coins-=1000;
                 myPet->setHealth(100);
                 myPet->setEnergy(100);
                 myPet->setHappiness(100);
@@ -391,10 +402,10 @@ void Owner::setCoins(double coins) {
 //Owner functions
 void Owner::addToInventory(const std::vector<std::string>& items) {
     for (int i=0;i<items.size();i++) {
-        if (noItems==size) {
+        if (noItems>=size) {
             int doubleSize;
             if (size==0)
-                doubleSize=2;
+                doubleSize=4;
             else
                 doubleSize=size*2;
             std::string* copyInventory=new std::string[doubleSize];
@@ -404,22 +415,21 @@ void Owner::addToInventory(const std::vector<std::string>& items) {
             inventory=copyInventory;
             size=doubleSize;
         }
-    }
-    for(int i=0;i<items.size();i++) {
         inventory[noItems]=items[i];
         noItems++;
     }
-
 }
 
 void Owner::ShowInventory() const {
+    std::cout<<"===================\n";
     if (noItems==0) {
         std::cout<<"Inventory is empty\n";
         return;
     }
    for(int i=0;i<noItems;i++) {
-       std::cout<<inventory[i]<<"\n";
+       std::cout<<"| "<<inventory[i]<<"\n";
    }
+    std::cout<<"===================\n";
 }
 
 void Owner::feed() {
@@ -479,6 +489,11 @@ void Owner::setName(std::string name) {
 Pet* Owner::getPet() const{
     return this->myPet;
 }
+void Owner::setPet(Pet* newPet) {
+    if (this->myPet!=nullptr) delete this->myPet;
+    this->myPet=newPet;
+}
+
 class Shop{
 private:
     double income;
@@ -529,7 +544,7 @@ void Shop::goShopping(Owner& owner) {
         std::cout<<"2. "<<fruits<<"\n";
         std::cout<<"3. "<<vegetables<<"\n";
         std::cout<<"4. "<<treats<<"\n";
-        std::cout<<"5. Abandon cart and exit\n";
+        std::cout<<"5. Back to menu\n";
         std::cout<<"6. Buy\n";
         std::cout<<"Select your action\n";
         std::cin>>choice;
@@ -689,7 +704,7 @@ void Games::selectQuestions() {
         {"How many eyerbows does Mona Lisa have?", "0"},
         {"What is the national animal of India?", "bengal tiger"},
         {"What color is a polar bear skin?", "black"},
-        {"What does Hakuna matata means?", "bo worries"},
+        {"What does Hakuna matata means?", "no worries"},
         {"How many layers of skin does a cameleon have?","4"},
         {"Where did christmas originate?", "rome"},
         {"What year was the first Grammy Awards held?","1959"},
@@ -772,7 +787,7 @@ void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
                     if (guess==randomNo) {
                         gameReward=this->reward*4 - i*20;
                         if (gameReward<0) gameReward=0;
-                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        std::cout<<"Congratulations! You won "<<gameReward<<" coins\n";
                         owner.setCoins(owner.getCoins()+gameReward);
                         break;
                     }
@@ -788,14 +803,17 @@ void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
                     if (guess==randomNo) {
                         gameReward=this->reward*15 - i*50;
                         if (gameReward<0) gameReward=0;
-                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        std::cout<<"Congratulations! You won "<<gameReward<<" coins\n";
                         owner.setCoins(owner.getCoins()+gameReward);
                         break;
                     }
-                    else if (guess<randomNo) std::cout<<"The number is higher than"<<guess<<"\n";
-                    else if (guess>randomNo) std::cout<<"The number is lower than"<<guess<<"\n";
+                    else if (guess<randomNo) std::cout<<"The number is higher than "<<guess<<"\n";
+                    else if (guess>randomNo) std::cout<<"The number is lower than "<<guess<<"\n";
                 }
-                if (gameReward==0) std::cout<<"You ran out of chances. Better luck next time!\n";
+                if (gameReward==0) {
+                    std::cout<<"You ran out of chances. Better luck next time!\n";
+                    std::cout<<randomNo<<" was the correct answer\n";
+                }
                 break;
             }
             case 3: {
@@ -807,14 +825,17 @@ void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
                     if (guess==randomNo) {
                         gameReward=this->reward*30 - i*100;
                         if (gameReward<0) gameReward=0;
-                        std::cout<<"Congratulations! You won"<<gameReward<<" coins\n";
+                        std::cout<<"Congratulations! You won "<<gameReward<<" coins\n";
                         owner.setCoins(owner.getCoins()+gameReward);
                         break;
                     }
-                    else if (guess<randomNo) std::cout<<"The number is higher than"<<guess<<"\n";
-                    else if (guess>randomNo) std::cout<<"The number is lower than"<<guess<<"\n";
+                    else if (guess<randomNo) std::cout<<"The number is higher than "<<guess<<"\n";
+                    else if (guess>randomNo) std::cout<<"The number is lower than "<<guess<<"\n";
                 }
-                if (gameReward==0) std::cout<<"You ran out of chances. Better luck next time!\n";
+                if (gameReward==0) {
+                    std::cout<<"You ran out of chances. Better luck next time!\n";
+                    std::cout<<randomNo<<" was the correct answer\n";
+                }
                 break;
             }
         }
@@ -844,10 +865,11 @@ public:
     void startGame();
     void changeOwnerName();
     void changePetName();
-    void interract();
+    void interact();
     void ownerItems();
     void GoToShop();
     void GoToGames();
+    void CreatePet();
 };
 Menu::Menu():owner(nullptr), store(0.0), trivia(30.0,30,{}), GuessTheNumber(50.0,30,{}) {
     trivia.selectQuestions();
@@ -893,8 +915,10 @@ void Menu::changePetName() {
     this->owner->getPet()->setName(NewName);
 }
 
-void Menu::interract() {
+void Menu::interact() {
     while (true) {
+        if (this->owner->getPet()->getHealth()<=0)
+            return;
         this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
         std::cout<<"1. Feed "<<this->owner->getPet()->getName()<<"\n";
         std::cout<<"2. Cuddle "<<this->owner->getPet()->getName()<<"\n";
@@ -926,10 +950,12 @@ void Menu::GoToShop() {
 
 void Menu::GoToGames() {
     while (true) {
+        if (this->owner->getPet()->getHealth()<=0)
+            return;
         this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
         std::cout<<"1. Play trivia\n";
         std::cout<<"2. Play Guess the number\n";
-        std::cout<<"3. back to menu\n";
+        std::cout<<"3. Back to menu\n";
         int choice;
         std::cin>>choice;
         switch (choice) {
@@ -939,7 +965,29 @@ void Menu::GoToGames() {
             default: std::cout<<"Invalid choice\n";break;
         }
     }
+}
 
+void Menu::CreatePet() {
+    if (this->owner!=nullptr) {
+        std::string petBreed;
+        char gender='x';
+        char petName[25];
+        float age =0.0;
+        std::cout<<"CREATE YOUR NEW PET AND BE A BETTER OWNER\n";
+        std::cout<<"Pet name: [max 25 characters] \n";
+        std::cin>>petName;
+        std::cout<<"Pet breed\n";
+        std::cin>>petBreed;
+        while (gender!='M' and gender!='F' and gender!='m' and gender!='f') {
+            std::cout<<"Pet gender(M/F): ";
+            std::cin>>gender;
+            if (gender!='M' and gender!='F')
+                std::cout<<"Choose between M or F\n";
+        }
+        Pet* newPet=new Pet(petName, petBreed, &age,gender);
+        this->owner->setPet(newPet);
+
+    }
 }
 
 void Menu::startGame() {
@@ -981,56 +1029,72 @@ void Menu::InteractiveMenu() {
         std::cin>>mainChoice;
         if (mainChoice==1) {
             startGame();
-            while(true) {
-                if (this->owner!=nullptr && this->owner->getPet()!=nullptr){
-                    this->owner->getPet()->ShowStatus();;
-                    std::cout<<"1. CHANGE YOUR NAME\n";
-                    std::cout<<"2. CHANGE PETS'S NAME\n";
-                    std::cout<<"3. INTERRACT WITH "<< this->owner->getPet()->getName()<<"\n";
-                    std::cout<<"4. SHOW MY ITEMS\n";
-                    std::cout<<"5. SHOP\n";
-                    std::cout<<"6. GAMES\n";
-                    std::cout<<"7. Exit\n";
-                    int choice;
-                    std::cin>>choice;
-                    switch (choice) {
-                        case 1: {
-                            changeOwnerName();
-                            break;
-                        };
-                        case 2: {
-                            changePetName();
-                            break;
-                        };
-                        case 3: {
-                            interract();
-                            break;
-                        };
-                        case 4: {
-                            ownerItems();
-                            break;
-                        };
-                        case 5: {
-                            GoToShop();
-                            break;
-                        };
-                        case 6: {
-                            GoToGames();
-                            break;
-                        };
-                        case 7: std::cout<<"ByeBye\n"; return;
-                        default: std::cout<<"Invalid choice\n";
+                while(true) {
+                    if (this->owner!=nullptr && this->owner->getPet()!=nullptr && this->owner->getPet()->getisAlive()){
+                        this->owner->getPet()->ShowStatus();;
+                        std::cout<<"1. CHANGE YOUR NAME\n";
+                        std::cout<<"2. CHANGE PETS'S NAME\n";
+                        std::cout<<"3. INTERRACT WITH "<< this->owner->getPet()->getName()<<"\n";
+                        std::cout<<"4. SHOW MY ITEMS\n";
+                        std::cout<<"5. SHOP\n";
+                        std::cout<<"6. GAMES\n";
+                        std::cout<<"7. Exit\n";
+                        int choice;
+                        std::cin>>choice;
+                        switch (choice) {
+                            case 1: {
+                                changeOwnerName();
+                                break;
+                            };
+                            case 2: {
+                                changePetName();
+                                break;
+                            };
+                            case 3: {
+                                interact();
+                                break;
+                            };
+                            case 4: {
+                                ownerItems();
+                                break;
+                            };
+                            case 5: {
+                                GoToShop();
+                                break;
+                            };
+                            case 6: {
+                                GoToGames();
+                                break;
+                            };
+                            case 7: std::cout<<"ByeBye\n"; return;
+                            default: std::cout<<"Invalid choice\n";
+                        }
                     }
-                }
+                    else {
+                        std::cout<<"1. Start new game\n";
+                        std::cout<<"2. Continue this session and create new pet\n";
+                        std::cout<<"3. Exit\n";
+                        int choice;
+                        std::cin>>choice;
+                        switch (choice) {
+                            case 1: startGame(); break;
+                            case 2: CreatePet(); break;
+                            case 3: return;
+                            default: std::cout<<"Invalid choice\n";
+                        }
+                    }
             }
         }
-        else {
-            std::cout<<"ByeBye!\n";
-            return;
-        }
+    else {
+        std::cout<<"ByeBye\n";
+        return;
+    }
 }
 
 int main() {
-
+    srand(time(0));
+    Menu game;
+    game.InteractiveMenu();
+    return 0;
 
 }
