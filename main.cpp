@@ -31,7 +31,6 @@ public:
     void eat(std::string foodChoice);
     void sleep();
     void cuddle();
-    void ShowStatus();
     int getHealth() const{return health;}
     void setHealth(int health);
     int getEnergy() const {return energy;}
@@ -45,6 +44,7 @@ public:
     static int getnoInstance(){return noInstance;}
     int getId() const{return id;}
     bool getisAlive() const {return isAlive;}
+    friend std::ostream& operator<<(std::ostream&, const Pet& obj);
 };
 int Pet::noInstance=0;
  Pet::Pet() :breed("N/A"), id(++noInstance) {
@@ -200,16 +200,6 @@ void Pet::ShowWarnings() {
          std::cout<<"WARNING: "<<name<<" is sad. Cuddle or play with him"<<std::endl;
      }
 }
-
-void Pet::ShowStatus() {
-     std::cout<<std::endl;
-     std::cout<<"======================================================\n";
-     std::cout<<"|"<<"PET STATUS: "<<name<<" "<<" , "<<gender<<" , "<<(*age)<<" years "<<std::endl;
-     std::cout<<"|HP :"<<health<<"/100 "<<"| EN :"<<energy<<"/100 "<<"| HG :"<<hunger<<"/100 "<<"| HAPPY"<<happiness<<"/100 "<<std::endl;
-     std::cout<<"======================================================\n";
-     std::cout<<std::endl;
-
- }
 //setters
 void Pet::setHealth(int health) {
      this->health=health;
@@ -241,6 +231,15 @@ void Pet::setName(char *NewName) {
     this->name=new char[strlen(NewName)+1];
      strcpy(this->name, NewName);
 }
+std::ostream& operator<<(std::ostream& os, const Pet& obj) {
+     os<<std::endl;
+     os<<"======================================================\n";
+     os<<"|PET STATUS: "<<obj.name<<" , "<<obj.gender<<" , "<<*obj.age<<" years ";
+     os<<"|HP: "<<obj.health<<"/100 "<<"| EN: "<<obj.energy<<"/100 "<<"| HG:"<<obj.hunger<<"/100 "<<"| HAPPY: "<<obj.happiness<<"/100\n";
+     os<<"======================================================\n";
+     return os;
+ }
+
 class Owner {
  private:
      std::string name;
@@ -272,6 +271,7 @@ class Owner {
      void setName(std::string name);
     Pet* getPet() const {return this->myPet;}
      void setPet(Pet* pet);
+     friend std::ostream& operator<<(std::ostream&, const Owner& obj);
  };
 
 int Owner::noInstance=0;
@@ -362,7 +362,7 @@ void Owner::giveMedicine() {
             }
             else std::cout<<"not enough money!"<<std::endl;
         }
-        else std::cout<<myPet->getName()<<" is heakthy enough, doesn't need medicine\n";
+        else std::cout<<myPet->getName()<<" is healthy enough, doesn't need medicine\n";
     }
 }
 void Owner::setCoins(double coins) {
@@ -457,7 +457,17 @@ void Owner::setPet(Pet* newPet) {
     if (newPet!=nullptr) this->myPet= new Pet(*newPet);
     else this->myPet=nullptr;
 }
-
+std::ostream& operator<<(std::ostream& os, const Owner& obj) {
+    os<<"==========================================\n";
+    os<<"[ OWNER PROFILE ]\n";
+    os<<"NAME: "<<obj.name<<" | ID: "<<obj.id<<"\n";
+    os<<"COINS: "<<obj.coins<<" | NUMBER OF ITEMS: "<<obj.noItems<<"\n";
+    if (obj.myPet!=nullptr) {
+        os<<"PET: "<<obj.myPet->getName()<<"\n";
+    }
+    os<<"==========================================\n";
+    return os;
+}
 class Shop{
 private:
     double income;
@@ -480,6 +490,7 @@ public:
     Shop& operator=(const Shop &obj);
     ~Shop();
     void goShopping(Owner& owner);
+    friend std::ostream& operator<<(std::ostream& , const Shop& obj);
 };
 int Shop::noInstance=0;
 Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"), id(++noInstance){
@@ -502,6 +513,7 @@ Shop::~Shop() {
 void Shop::goShopping(Owner& owner) {
     double price=0;
     int choice=-1;
+    std::cout<<*this;
     while (choice!=5) {
         std::cout<<"WELCOME! What do you eant to buy?\n";
         std::cout<<"1. "<<meat<<"\n";
@@ -607,6 +619,16 @@ struct questionsArray {
     std::string question;
     std::string answer;
 };
+
+std::ostream& operator<<(std::ostream& os, const Shop& obj) {
+    os<<"==========================================================================\n";
+    os<<"STORE ID: "<<obj.id<<"\n";
+    os<<"TOTAL INCOME "<<obj.income<<" coins\n";
+    os<<"PRICES: Meat: "<<Shop::meat_price<<" coins | Fruit: "<<Shop::fruits_price<<" coins | Vegetables: "<<Shop::vegetables_price<<" coins | Treats: "<<Shop::treats_price<<" coims\n";
+    os<<"==========================================================================\n";
+    return os;
+
+}
 class Games{
 private:
     double reward;
@@ -626,6 +648,7 @@ public:
     void selectQuestions();
     void GuessTheNumber(Owner&, Pet&);
     void playTrivia(Owner&, Pet&);
+    friend std::ostream& operator<<(std::ostream&, const Games& obj);
 };
  int Games::noInstance=0;
 Games::Games():id(++noInstance) {
@@ -663,6 +686,15 @@ bool Games::CheckEnergy(Pet& myPet) {
     return true;
 }
 
+std::ostream& operator<<(std::ostream& os, const Games& obj) {
+    os<<"=========================================\n";
+    os<<"[ GAMES CENTER ]\n";
+    os<<"CURRENT HIGHSCORE "<<Games::Highscore<<" coins\n";
+    os<<"ENERGY REQUIRED TO PLAY "<<obj.energyCost<<"\n";
+    os<<"=========================================\n";
+    return os;
+}
+
 void Games::selectQuestions() {
     questions={
         {"How many eyerbows does Mona Lisa have?", "0"},
@@ -684,7 +716,6 @@ void Games::playTrivia(Owner& owner, Pet& myPet) {
     if (!CheckEnergy(myPet)) return;
     std::cout<<"game id "<< this->id<<"\n";
     std::cout<<"Welcome to trivia!\n";
-    std::cout<<"Current income score is "<<Highscore<<"\n";
     std::cout<<"Press 1 to start the game or 0 to exit\n";
     int choice=-1;
     std::cin>>choice;
@@ -727,7 +758,6 @@ void Games::GuessTheNumber(Owner& owner, Pet& myPet) {
     if (!CheckEnergy(myPet)) return;
     std::cout<<"game id "<< this->id<<"\n";
     std::cout<<"Welcome to Guess the number!\n";
-    std::cout<<"Current highest income is "<<Highscore<<"\n";
     std::cout<<"Press 1 to start the game or 0 to exit\n";
     int choice=-1;
     int lastChoice=-1;
@@ -871,6 +901,7 @@ void Menu::changeOwnerName() {
     std::string name;
     std::cin>>name;
     this->owner->setName(name);
+    std::cout<<*(this->owner);
 }
 void Menu::changePetName() {
     char NewName[25];
@@ -883,7 +914,7 @@ void Menu::interact() {
     while (true) {
         if (this->owner->getPet()->getHealth()<=0)
             return;
-        this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
+        std::cout<<*(this->owner->getPet()); std::cout<<std::endl;
         std::cout<<"1. Feed "<<this->owner->getPet()->getName()<<"\n";
         std::cout<<"2. Cuddle "<<this->owner->getPet()->getName()<<"\n";
         std::cout<<"3. Give medicine\n";
@@ -904,7 +935,6 @@ void Menu::interact() {
 void Menu::ownerItems() {
     std::cout<<this->owner->getName()<<"'s inventory:\n";
     this->owner->ShowInventory();
-    std::cout<<"Your coins: "<<this->owner->getCoins()<<" coins\n";
     std::cout<<std::endl;
 }
 
@@ -913,10 +943,11 @@ void Menu::GoToShop() {
 }
 
 void Menu::GoToGames() {
+    std::cout<<this->trivia;
     while (true) {
         if (this->owner->getPet()->getHealth()<=0)
             return;
-        this->owner->getPet()->ShowStatus();; std::cout<<std::endl;
+        std::cout<<*(this->owner->getPet()); std::cout<<std::endl;
         std::cout<<"1. Play trivia\n";
         std::cout<<"2. Play Guess the number\n";
         std::cout<<"3. Back to menu\n";
@@ -983,6 +1014,7 @@ void Menu::startGame() {
     this->owner=new Owner(ownerName,100.0,secPet,inventory,2,4);
     delete[] inventory;
     std::cout<<"WElCOME "<<ownerName<<"!\n";
+    std::cout<<*(this->owner);
 }
 
 void Menu::InteractiveMenu() {
@@ -995,7 +1027,7 @@ void Menu::InteractiveMenu() {
             startGame();
                 while(true) {
                     if (this->owner!=nullptr && this->owner->getPet()!=nullptr && this->owner->getPet()->getisAlive()){
-                        this->owner->getPet()->ShowStatus();;
+                        std::cout<<*(this->owner->getPet());
                         std::cout<<"1. CHANGE YOUR NAME\n";
                         std::cout<<"2. CHANGE PETS'S NAME\n";
                         std::cout<<"3. INTERRACT WITH "<< this->owner->getPet()->getName()<<"\n";
