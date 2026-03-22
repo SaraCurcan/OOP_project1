@@ -205,6 +205,7 @@ void Pet::ShowWarnings() {
 void Pet::setHealth(int health) {
      this->health=health;
      CheckLimits();
+     CheckDeath();
  }
 void Pet::setEnergy(int energy) {
      this->energy=energy;
