@@ -288,7 +288,10 @@ Owner::Owner(): id(++noInstance) {
 Owner::Owner(std::string name,double coins,Pet* myPet,std::string* inventory,int noItems,int size): id(++noInstance) {
     this->name=name;
     this->coins=coins;
-    this->myPet=myPet;
+    if (myPet!=nullptr) {
+        this->myPet=new Pet(*myPet);
+    }
+    else this->myPet=nullptr;
     this->noItems=noItems;
     this->size=size;
     this->inventory=new std::string[this->size];
@@ -451,7 +454,8 @@ void Owner::setName(std::string name) {
 }
 void Owner::setPet(Pet* newPet) {
     if (this->myPet!=nullptr) delete this->myPet;
-    this->myPet=newPet;
+    if (newPet!=nullptr) this->myPet= new Pet(*newPet);
+    else this->myPet=nullptr;
 }
 
 class Shop{
