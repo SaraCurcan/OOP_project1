@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <cstring>
 #include <string>
@@ -410,7 +411,7 @@ void Owner::ShowInventory() const {
    for(int i=0;i<noItems;i++) {
        std::cout<<"| "<<inventory[i]<<"\n";
    }
-    std::cout<<"===================\n";
+    std::cout<<"|------------------\n";
 }
 
 void Owner::feed() {
@@ -954,6 +955,8 @@ void Menu::interact() {
 void Menu::ownerItems() {
     std::cout<<this->owner->getName()<<"'s inventory:\n";
     this->owner->ShowInventory();
+    std::cout<<"|"<<owner->getCoins()<<" coins\n";
+    std::cout<<"===================\n";
     std::cout<<std::endl;
 }
 
