@@ -45,6 +45,7 @@ public:
     int getId() const{return id;}
     bool getisAlive() const {return isAlive;}
     friend std::ostream& operator<<(std::ostream&, const Pet& obj);
+    friend std::istream& operator>>(std::istream&, Pet& obj);
 };
 int Pet::noInstance=0;
  Pet::Pet() :breed("N/A"), id(++noInstance) {
@@ -234,12 +235,21 @@ void Pet::setName(char *NewName) {
 std::ostream& operator<<(std::ostream& os, const Pet& obj) {
      os<<std::endl;
      os<<"======================================================\n";
-     os<<"|PET STATUS: "<<obj.name<<" , "<<obj.gender<<" , "<<*obj.age<<" years ";
+     os<<"|PET STATUS: "<<obj.name<<" , "<<obj.gender<<" , "<<*obj.age<<" years \n";
      os<<"|HP: "<<obj.health<<"/100 "<<"| EN: "<<obj.energy<<"/100 "<<"| HG:"<<obj.hunger<<"/100 "<<"| HAPPY: "<<obj.happiness<<"/100\n";
      os<<"======================================================\n";
      return os;
  }
 
+std::istream& operator>>(std::istream& is, Pet& obj) {
+     char name[50];
+     std::cout<<"Pet name (max 25 characters): ";
+     is>>name;
+     if (obj.name!=nullptr) delete[] obj.name;
+     obj.name=new char[strlen(name)+1];
+     strcpy(obj.name,name);
+     return is;
+ }
 class Owner {
  private:
      std::string name;
@@ -272,6 +282,7 @@ class Owner {
     Pet* getPet() const {return this->myPet;}
      void setPet(Pet* pet);
      friend std::ostream& operator<<(std::ostream&, const Owner& obj);
+     friend std::istream& operator>>(std::istream&, Owner& obj);
  };
 
 int Owner::noInstance=0;
@@ -468,6 +479,14 @@ std::ostream& operator<<(std::ostream& os, const Owner& obj) {
     os<<"==========================================\n";
     return os;
 }
+std::istream& operator>>(std::istream& is, Owner& obj) {
+    std::string name;
+    std::cout<<"New name: ";
+    is>>name;
+    obj.setName(name);
+    return is;
+}
+
 class Shop{
 private:
     double income;
@@ -491,6 +510,7 @@ public:
     ~Shop();
     void goShopping(Owner& owner);
     friend std::ostream& operator<<(std::ostream& , const Shop& obj);
+    friend std::istream& operator>>(std::istream&, Shop& obj);
 };
 int Shop::noInstance=0;
 Shop::Shop():meat("Meat"), fruits("Fruits"), vegetables("Vegetables"), treats("Treats"), id(++noInstance){
@@ -627,7 +647,16 @@ std::ostream& operator<<(std::ostream& os, const Shop& obj) {
     os<<"PRICES: Meat: "<<Shop::meat_price<<" coins | Fruit: "<<Shop::fruits_price<<" coins | Vegetables: "<<Shop::vegetables_price<<" coins | Treats: "<<Shop::treats_price<<" coims\n";
     os<<"==========================================================================\n";
     return os;
+}
 
+std::istream& operator>>(std::istream& is, Shop& obj) {
+    std::cout<<"Enter shop income: \n";
+    is>>obj.income;
+    if (obj.income<0) {
+        std::cout<<"Income must be positive\n";
+        obj.income=0;
+    }
+    return is;
 }
 class Games{
 private:
@@ -649,6 +678,7 @@ public:
     void GuessTheNumber(Owner&, Pet&);
     void playTrivia(Owner&, Pet&);
     friend std::ostream& operator<<(std::ostream&, const Games& obj);
+    friend std::istream& operator>>(std::istream&, Games& obj);
 };
  int Games::noInstance=0;
 Games::Games():id(++noInstance) {
@@ -693,6 +723,9 @@ std::ostream& operator<<(std::ostream& os, const Games& obj) {
     os<<"ENERGY REQUIRED TO PLAY "<<obj.energyCost<<"\n";
     os<<"=========================================\n";
     return os;
+}
+std::istream& operator>>(std::istream& is,Games& obj) {
+    return is;
 }
 
 void Games::selectQuestions() {
@@ -857,8 +890,6 @@ public:
     ~Menu();
     void InteractiveMenu();
     void startGame();
-    void changeOwnerName();
-    void changePetName();
     void interact();
     void ownerItems();
     void GoToShop();
@@ -895,19 +926,6 @@ Menu::~Menu() {
     if (this->owner!=nullptr)
     delete this->owner;
     else this->owner=nullptr;
-}
-void Menu::changeOwnerName() {
-    std::cout<<"New name: ";
-    std::string name;
-    std::cin>>name;
-    this->owner->setName(name);
-    std::cout<<*(this->owner);
-}
-void Menu::changePetName() {
-    char NewName[25];
-    std::cout<<"Pet name (max 25 characters): ";
-    std::cin>>NewName;
-    this->owner->getPet()->setName(NewName);
 }
 
 void Menu::interact() {
@@ -1013,6 +1031,7 @@ void Menu::startGame() {
     inventory[1]="Strawberry";
     this->owner=new Owner(ownerName,100.0,secPet,inventory,2,4);
     delete[] inventory;
+    std::cin>>store;
     std::cout<<"WElCOME "<<ownerName<<"!\n";
     std::cout<<*(this->owner);
 }
@@ -1039,11 +1058,12 @@ void Menu::InteractiveMenu() {
                         std::cin>>choice;
                         switch (choice) {
                             case 1: {
-                                changeOwnerName();
+                                std::cin>>*(this->owner);
+                                std::cout<<*(this->owner);
                                 break;
                             };
                             case 2: {
-                                changePetName();
+                                std::cin>>*(this->owner->getPet());
                                 break;
                             };
                             case 3: {
