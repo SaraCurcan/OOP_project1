@@ -32,19 +32,19 @@ public:
     void sleep();
     void cuddle();
     void ShowStatus();
-    int getHealth() const;
+    int getHealth() const{return health;}
     void setHealth(int health);
-    int getEnergy() const;
+    int getEnergy() const {return energy;}
     void setEnergy(int energy);
-    int getHappiness() const;
+    int getHappiness() const{return happiness;}
     void setHappiness(int happiness);
-    const char* getName() const;
+    const char* getName() const{return name;}
     void setName(char* NewName);
-    int getHunger() const;
+    int getHunger() const{return hunger;}
     void setHunger(int hunger);
-    static int getnoInstance();
-    int getId() const;
-    bool getisAlive() const;
+    static int getnoInstance(){return noInstance;}
+    int getId() const{return id;}
+    bool getisAlive() const {return isAlive;}
 };
 int Pet::noInstance=0;
  Pet::Pet() :breed("N/A"), id(++noInstance) {
@@ -210,16 +210,10 @@ void Pet::ShowStatus() {
      std::cout<<std::endl;
 
  }
-//setters and getters
-int Pet::getHealth() const {
-     return health;
- }
+//setters
 void Pet::setHealth(int health) {
      this->health=health;
      CheckLimits();
- }
-int Pet::getEnergy() const {
-     return energy;
  }
 void Pet::setEnergy(int energy) {
      this->energy=energy;
@@ -227,19 +221,11 @@ void Pet::setEnergy(int energy) {
          this->health-=30;
      CheckLimits();
  }
-
-int Pet::getHappiness() const {
-    return happiness;
-}
-
 void Pet::setHappiness(int happiness) {
      this->happiness=happiness;
      if (this->happiness<=10)
          this->health-=10;
      CheckLimits();
-}
-int Pet::getHunger() const{
-     return hunger;
 }
 void Pet::setHunger(int hunger) {
      this->hunger=hunger;
@@ -248,17 +234,6 @@ void Pet::setHunger(int hunger) {
      CheckLimits();
  }
 
-const char* Pet::getName() const{
-    return name;
-}
-
-int Pet::getnoInstance() {
-    return noInstance;
-}
-
-int Pet::getId() const {
-    return id;
-}
 
 void Pet::setName(char *NewName) {
     if (this->name!=nullptr)
@@ -266,11 +241,6 @@ void Pet::setName(char *NewName) {
     this->name=new char[strlen(NewName)+1];
      strcpy(this->name, NewName);
 }
-
-bool Pet::getisAlive() const {
-    return isAlive;
-}
-
 class Owner {
  private:
      std::string name;
@@ -292,15 +262,15 @@ class Owner {
      void putToSleep();
      void cuddleIt();
      void giveMedicine();
-     double getCoins() const;
+     double getCoins() const {return coins;}
      void setCoins(double coins);
     void addToInventory(const std::vector<std::string>& items);
      void ShowInventory() const;
-     static int getnoInstance();
-     int getId() const;
-     const std::string getName() const;
+     static int getnoInstance(){return noInstance;}
+     int getId() const{return id;}
+     const std::string getName() const {return name;}
      void setName(std::string name);
-    Pet* getPet() const;
+    Pet* getPet() const {return this->myPet;}
      void setPet(Pet* pet);
  };
 
@@ -392,10 +362,6 @@ void Owner::giveMedicine() {
         else std::cout<<myPet->getName()<<" is heakthy enough, doesn't need medicine\n";
     }
 }
-//setters and getters
-double Owner::getCoins() const {
-    return coins;
-}
 void Owner::setCoins(double coins) {
     this->coins=coins;
 }
@@ -479,15 +445,9 @@ void Owner::removeFood(std::string item) {
         noItems--;
     }
 }
-const std::string Owner::getName() const{
-    return name;
-}
 
 void Owner::setName(std::string name) {
     this->name=name;
-}
-Pet* Owner::getPet() const{
-    return this->myPet;
 }
 void Owner::setPet(Pet* newPet) {
     if (this->myPet!=nullptr) delete this->myPet;
